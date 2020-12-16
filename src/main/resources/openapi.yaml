@@ -204,6 +204,22 @@ paths:
               schema:
                 $ref: '#/components/requestBodies/PassportBody'
   '/passports/{passportNumber}':
+    get:
+      tags:
+        - passport
+      parameters:
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: integer
+      summary: Returns a passport
+      description: Passport managment
+      operationId: getPassport
+      responses:
+        '200':
+          $ref: '#/components/requestBodies/PersonBody'
     delete:
       tags:
         - passport
