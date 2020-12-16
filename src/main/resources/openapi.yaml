@@ -1,0 +1,282 @@
+openapi: 3.0.0
+info:
+  title: Passport Office API
+  description: Passport Office API providing passport and people managment
+  version: 0.0.1
+servers:
+  - url: localhost:8080/v1
+paths:
+  /persons:
+    get:
+      tags:
+       - person
+      summary: Returns a list of persons
+      description: People managment
+      operationId: getPersons
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PersonsBody'
+    post:
+      tags:
+       - person
+      summary: Creates a person
+      description: People managment
+      operationId: createPerson 
+      requestBody:
+        $ref: '#/components/requestBodies/PersonBody'
+      responses:
+        '201':
+          description: A created person
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/requestBodies/PersonBody'
+  '/persons/{personId}':
+    get:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+      summary: Returns a person
+      description: People managment
+      operationId: getPerson
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PersonBody' 
+    put:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+      summary: Updates a person
+      description: People managment
+      operationId: putPerson
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PersonBody'
+    delete:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+      summary: Deletes a person.
+      description: People managment.
+      operationId: deletePerson
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PersonBody'       
+  '/persons/{personId}/active_passports':
+    get:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+      summary: Returns a list of active passports of the person
+      description: People managment
+      operationId: getActivePassports
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PassportsBody' 
+    post:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+      summary: Creates an active passport for the person
+      description: People managment
+      operationId: createActivePassport
+      requestBody:
+        $ref: '#/components/requestBodies/PassportBody'
+      responses:
+        '201':
+          description: A created active passport
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/requestBodies/PassportBody' 
+  '/persons/{personId}/active_passports/{passportNumber}':
+    put:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+        - name: passportNumber
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer      
+      summary: Adds the passport to the active passport of the person
+      description: People managment
+      operationId: putActivePassport
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PassportBody'
+  '/persons/{personId}/lost_passports/{passportNumber}': 
+    put:
+      tags:
+       - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer
+        - name: passportNumber
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: integer      
+      summary: Adds the passport to the lost passports list of the person and deletes it from the active passports
+      description: People managment
+      operationId: putLostPassport
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PassportBody'
+  /passports:
+    get:
+      parameters:
+        - in: query
+          name: min_given_date
+          schema:
+            type: string
+          description: The minimum given date of passports
+        - in: query
+          name: max_given_date
+          schema:
+            type: string
+          description: The maximum given date of passports
+      tags:
+       - passport
+      summary: Returns a list of passports
+      description: Passport managment
+      operationId: getPassports
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PassportBody'
+    post:
+      tags:
+       - passport
+      summary: Creates a passport
+      description: People managment
+      operationId: createPassport 
+      requestBody:
+        $ref: '#/components/requestBodies/PassportBody'
+      responses:
+        '201':
+          description: A created passport
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/requestBodies/PassportBody'
+  '/passports/{passportNumber}/persons':
+    get:
+      tags:
+       - passport
+      parameters:
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: integer
+      summary: Returns a person that has the passport
+      description: Passport managment
+      operationId: getPesonByPassport
+      responses:
+        '200':    
+          $ref: '#/components/requestBodies/PersonBody' 
+          
+components:
+  schemas:
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        birthday:
+          type: string
+        country:
+          $ref: '#/components/schemas/Country'
+    Passport:
+      type: object
+      properties:
+        number:
+          type: integer
+        givenDate:
+          type: string
+        departmentCode:
+          type: string  
+    Country:
+      type: string
+      enum:
+        - US
+        - RU
+        - UK
+  requestBodies:
+    PersonsBody:
+      description: A JSON array of persons
+      content:
+        application/json:
+          schema: 
+            type: array
+            items: 
+              oneOf:
+                - $ref: '#/components/schemas/Person'
+    PersonBody:
+      description: A JSON object containing person information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Person'
+    PassportsBody:
+      description: A JSON array of passports
+      content: 
+        application/json: 
+          schema: 
+            type: array
+            items: 
+              oneOf:
+                - $ref: '#/components/schemas/Passport'
+    PassportBody:
+      description: A JSON object containing passport information
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Passport'
