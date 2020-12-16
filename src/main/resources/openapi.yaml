@@ -219,7 +219,7 @@ paths:
       operationId: getPassport
       responses:
         '200':
-          $ref: '#/components/requestBodies/PersonBody'
+          $ref: '#/components/requestBodies/PassportBody'
     delete:
       tags:
         - passport
