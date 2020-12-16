@@ -192,7 +192,7 @@ paths:
       tags:
         - passport
       summary: Creates a passport
-      description: People managment
+      description: Passport managment
       operationId: createPassport
       requestBody:
         $ref: '#/components/requestBodies/PassportBody'
@@ -203,23 +203,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/requestBodies/PassportBody'
+  '/passports/{passportNumber}':
     delete:
       tags:
         - passport
-      summary: Deletes a person.
+      parameters:
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: integer
+      summary: Deletes a passport.
       description: Passport managment
       operationId: deletePassport
       responses:
         '200':
           $ref: '#/components/requestBodies/PassportBody'
-  '/passports/{passportNumber}':
     put:
       tags:
         - passport
       parameters:
         - name: passportNumber
           in: path
-          description: ID of the person
+          description: ID of the passport
           required: true
           schema:
             type: integer
