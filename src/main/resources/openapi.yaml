@@ -56,7 +56,8 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
       summary: Returns a person
       description: People managment
       operationId: getPerson
@@ -72,7 +73,8 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
       summary: Updates a person
       description: People managment
       operationId: putPerson
@@ -90,7 +92,8 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
       summary: Deletes a person.
       description: People managment.
       operationId: deletePerson
@@ -107,7 +110,8 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
         - name: state
           in: query
           schema:
@@ -137,7 +141,8 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
       summary: Creates an active passport for the person
       description: People managment
       operationId: createActivePassport
@@ -156,13 +161,14 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
         - name: passportNumber
           in: path
-          description: ID of the person
+          description: ID of the passport
           required: true
           schema:
-            type: integer
+            type: string
       summary: Gets a passport of a person
       description: People managment
       operationId: getPassport
@@ -178,13 +184,14 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
         - name: passportNumber
           in: path
-          description: ID of the person
+          description: ID of the passport
           required: true
           schema:
-            type: integer
+            type: string
       summary: Updates a passport of a person
       description: People managment
       operationId: putPassport
@@ -202,13 +209,14 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
         - name: passportNumber
           in: path
-          description: ID of the person
+          description: ID of the passport
           required: true
           schema:
-            type: integer
+            type: string
       summary: Deletes a passport of a person
       description: People managment
       operationId: deletePassport
@@ -225,13 +233,14 @@ paths:
           description: ID of the person
           required: true
           schema:
-            type: integer
+            type: string
+            format: uuid
         - name: passportNumber
           in: path
-          description: ID of the person
+          description: ID of the passport
           required: true
           schema:
-            type: integer
+            type: string
       summary: Makes a passport lost
       description: People managment
       operationId: lostPassport
