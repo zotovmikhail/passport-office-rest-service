@@ -48,6 +48,10 @@ paths:
           $ref: '#/components/responses/PersonResponse'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   '/persons/{personId}':
     get:
       tags:
@@ -68,6 +72,10 @@ paths:
           $ref: '#/components/responses/PersonResponse'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
       tags:
         - person
@@ -89,10 +97,22 @@ paths:
           $ref: '#/components/requestBodies/PersonRequest'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
       tags:
         - person
@@ -112,6 +132,10 @@ paths:
           description: No content
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   '/persons/{personId}/passports':
     get:
       tags:
@@ -146,6 +170,10 @@ paths:
           $ref: '#/components/responses/PassportsResponse'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       tags:
         - person
@@ -167,8 +195,16 @@ paths:
           $ref: '#/components/responses/PassportsResponse'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   '/persons/{personId}/passports/{passportNumber}':
     get:
       tags:
@@ -195,6 +231,10 @@ paths:
           $ref: '#/components/responses/PassportResponse'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
       tags:
         - person
@@ -222,10 +262,22 @@ paths:
           $ref: '#/components/responses/PassportResponse'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '409':
           description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
       tags:
         - person
@@ -251,6 +303,10 @@ paths:
           description: No content
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   '/persons/{personId}/passports/{passportNumber}/loss':
     post:
       tags:
@@ -320,6 +376,13 @@ components:
       enum:
         - active
         - lost
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
   requestBodies:
     PersonRequest:
       description: A person
