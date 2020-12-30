@@ -46,6 +46,8 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/PersonResponse'
+        '400':
+          description: Bad request
   '/persons/{personId}':
     get:
       tags:
@@ -64,6 +66,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/PersonResponse'
+        '404':
+          description: Not found
     put:
       tags:
         - person
@@ -83,6 +87,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/requestBodies/PersonRequest'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
     delete:
       tags:
         - person
@@ -99,7 +109,9 @@ paths:
       operationId: deletePerson
       responses:
         '204':
-          description: Person has been deleted
+          description: No content
+        '404':
+          description: Not found
   '/persons/{personId}/passports':
     get:
       tags:
@@ -132,6 +144,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/PassportsResponse'
+        '404':
+          description: Not found
     post:
       tags:
         - person
@@ -151,6 +165,10 @@ paths:
       responses:
         '201':
           $ref: '#/components/responses/PassportsResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
   '/persons/{personId}/passports/{passportNumber}':
     get:
       tags:
@@ -175,6 +193,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/PassportResponse'
+        '404':
+          description: Not found
     put:
       tags:
         - person
@@ -200,6 +220,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/PassportResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
     delete:
       tags:
         - person
@@ -222,7 +248,9 @@ paths:
       operationId: deletePassport
       responses:
         '204':
-          description: Passport has been deleted
+          description: No content
+        '404':
+          description: Not found
   '/persons/{personId}/passports/{passportNumber}/loss':
     post:
       tags:
@@ -247,6 +275,8 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/PassportResponse'
+        '404':
+          description: Not found
         '409':
           description: A passport can be lost only once
 components:
