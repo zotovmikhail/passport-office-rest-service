@@ -1,0 +1,467 @@
+openapi: 3.0.3
+info:
+  title: Passport Office API
+  description: Passport Office API providing passport and people managment
+  version: 0.0.1
+servers:
+  - url: localhost:8080/v1
+paths:
+  /persons:
+    get:
+      tags:
+        - person
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number of the results
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            maximum: 100
+            default: 100
+          description: Number of results per page
+        - in: query
+          name: passportNumber
+          schema:
+            type: string
+          description: Returns a person by a passport number
+      summary: Returns a list of persons
+      description: People managment
+      operationId: getPersons
+      responses:
+        '200':
+          $ref: '#/components/responses/PersonsResponse'
+    post:
+      tags:
+        - person
+      summary: Creates persons
+      description: People managment
+      operationId: createPersons
+      requestBody:
+        $ref: '#/components/requestBodies/PersonsRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/PersonResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/persons/{personId}':
+    get:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+      summary: Returns a person
+      description: People managment
+      operationId: getPerson
+      responses:
+        '200':
+          $ref: '#/components/responses/PersonResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+      summary: Updates a person
+      description: People managment
+      operationId: putPerson
+      requestBody:
+        $ref: '#/components/requestBodies/PersonRequest'
+      responses:
+        '200':
+          $ref: '#/components/requestBodies/PersonRequest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+      summary: Deletes a person.
+      description: People managment.
+      operationId: deletePerson
+      responses:
+        '204':
+          description: No content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/persons/{personId}/passports':
+    get:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: state
+          in: query
+          schema:
+            $ref: '#/components/schemas/PassportState'
+        - name: minGivenDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: maxGivenDate
+          in: query
+          schema:
+            type: string
+            format: date
+      summary: Returns a list of passports of the person
+      description: People managment
+      operationId: getPassports
+      responses:
+        '200':
+          $ref: '#/components/responses/PassportsResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+      summary: Creates an active passport for the person
+      description: People managment
+      operationId: createActivePassport
+      requestBody:
+        $ref: '#/components/requestBodies/PassportsRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/PassportsResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/persons/{personId}/passports/{passportNumber}':
+    get:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: string
+      summary: Gets a passport of a person
+      description: People managment
+      operationId: getPassport
+      responses:
+        '200':
+          $ref: '#/components/responses/PassportResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: string
+      summary: Updates a passport of a person
+      description: People managment
+      operationId: putPassport
+      requestBody:
+        $ref: '#/components/requestBodies/PassportRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/PassportResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: string
+      summary: Deletes a passport of a person
+      description: People managment
+      operationId: deletePassport
+      responses:
+        '204':
+          description: No content
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/persons/{personId}/passports/{passportNumber}/loss':
+    post:
+      tags:
+        - person
+      parameters:
+        - name: personId
+          in: path
+          description: ID of the person
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: passportNumber
+          in: path
+          description: ID of the passport
+          required: true
+          schema:
+            type: string
+      summary: Makes a passport lost
+      description: People managment
+      operationId: lostPassport
+      responses:
+        '200':
+          $ref: '#/components/responses/PassportResponse'
+        '404':
+          description: Not found
+        '409':
+          description: A passport can be lost only once
+components:
+  schemas:
+    Person:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        birthday:
+          type: string
+          format: date
+        country:
+          type: string
+          pattern: "[a-zA-Z]{2}"
+          minLength: 2
+          maxLength: 2
+      required:
+        - name
+        - birthday
+        - country
+    Passport:
+      type: object
+      properties:
+        number:
+          type: string
+        givenDate:
+          type: string
+          format: date
+        departmentCode:
+          type: string
+      required:
+        - number
+        - givenDate
+        - departmentCode
+    PassportState:
+      type: string
+      enum:
+        - active
+        - lost
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+  requestBodies:
+    PersonRequest:
+      description: A person
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Person'
+    PersonsRequest:
+      description: A JSON array of persons
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              oneOf:
+                -  type: object
+                   properties:
+                     name:
+                       type: string
+                     birthday:
+                       type: string
+                       format: date
+                     country:
+                       type: string
+                       pattern: "[a-zA-Z]{2}"
+                       minLength: 2
+                       maxLength: 2
+            minItems: 1
+    PassportsRequest:
+      description: A JSON array of passports
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/Passport'
+    PassportRequest:
+      description: A passport
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Passport'
+  responses:
+    PersonResponse:
+      description: A person
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Person'
+    PersonsResponse:
+      description: A list of persons
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/Person'
+              count:
+                type: integer
+              page:
+                type: integer
+    PassportsResponse:
+      description: A list of passports
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              oneOf:
+                - $ref: '#/components/schemas/Passport'
+    PassportResponse:
+      description: A passport
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Passport'
+
