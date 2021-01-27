@@ -9,6 +9,7 @@ import com.zotov.edu.passportofficerestservice.model.response.PersonResponse;
 import com.zotov.edu.passportofficerestservice.service.PassportService;
 import com.zotov.edu.passportofficerestservice.service.PersonService;
 import lombok.AllArgsConstructor;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,7 +33,7 @@ public class PersonApiController {
 
     @GetMapping
     public Page<PersonResponse> getPersons(@RequestParam(required = false) Optional<String> passportNumber,
-                                           @PageableDefault(size = 100) Pageable pageable) {
+                                           @ParameterObject @PageableDefault(size = 100) Pageable pageable) {
         if (passportNumber.isPresent()) {
             return personsService.getPersonByPassportNumber(passportNumber.get());
         }
