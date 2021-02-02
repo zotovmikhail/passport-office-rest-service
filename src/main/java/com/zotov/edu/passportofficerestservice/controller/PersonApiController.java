@@ -33,10 +33,9 @@ public class PersonApiController {
     @GetMapping
     public Page<PersonResponse> getPersons(@RequestParam(required = false) Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
-        if (passportNumber.isPresent()) {
-            return personsService.getPersonByPassportNumber(passportNumber.get());
-        }
-        return personsService.getAllPersons(pageable);
+        return passportNumber
+                .map(personsService::getPersonByPassportNumber)
+                .orElseGet(() -> personsService.getAllPersons(pageable));
     }
 
     @PostMapping()
@@ -62,17 +61,15 @@ public class PersonApiController {
     }
 
     @GetMapping("/{id}/passports")
-    public List<PassportResponse> getPassports(@PathVariable String id,
-                                               @RequestParam(required = false, defaultValue = "ACTIVE")
-                                                       PassportState state,
-                                               @RequestParam(required = false)
-                                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                                                       Optional<LocalDate> minGivenDate,
-                                               @RequestParam(required = false)
-                                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                                                       Optional<LocalDate> maxGivenDate) {
+    public List<PassportResponse> getPassportsByGivenDatesRange(@PathVariable String id,
+                                                                @RequestParam(required = false, defaultValue = "ACTIVE")
+                                                                        PassportState state,
+                                                                @RequestParam(required = false)
+                                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate minGivenDate,
+                                                                @RequestParam(required = false)
+                                                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate maxGivenDate) {
         personsService.checkIfPersonExists(id);
-        if (minGivenDate.isPresent() || maxGivenDate.isPresent()) {
+        if (minGivenDate != null || maxGivenDate != null) {
             return passportService.getPassportsByGivenDateRange(id, state, minGivenDate, maxGivenDate);
         }
         return passportService.getPassports(id, state);
@@ -106,18 +103,14 @@ public class PersonApiController {
     public void deletePassport(@PathVariable String personId,
                                @PathVariable String passportNumber) {
         personsService.checkIfPersonExists(personId);
-        passportService
-                .checkIfPassportExists(passportNumber)
-                .deletePassport(passportNumber);
+        passportService.deletePassport(passportNumber);
     }
 
     @PostMapping("/{personId}/passports/{passportNumber}/loss")
     public PassportResponse losePassport(@PathVariable String personId,
                                          @PathVariable String passportNumber) {
         personsService.checkIfPersonExists(personId);
-        return passportService
-                .checkIfPassportExists(passportNumber)
-                .losePassport(passportNumber);
+        return passportService.losePassport(passportNumber);
     }
 
 

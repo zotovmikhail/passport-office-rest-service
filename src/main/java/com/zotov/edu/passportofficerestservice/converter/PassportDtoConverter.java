@@ -48,7 +48,7 @@ public class PassportDtoConverter implements PassportConverter {
     }
 
     @Override
-    public Passport covertToEntity(String id, PassportRequest passportRequest) {
+    public Passport convertToEntity(String id, PassportRequest passportRequest) {
         return new Passport(
                 passportRequest.getNumber(),
                 passportRequest.getGivenDate(),

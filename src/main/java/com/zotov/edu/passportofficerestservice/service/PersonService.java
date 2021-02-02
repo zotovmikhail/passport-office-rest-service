@@ -2,7 +2,6 @@ package com.zotov.edu.passportofficerestservice.service;
 
 import com.zotov.edu.passportofficerestservice.converter.PersonConverter;
 import com.zotov.edu.passportofficerestservice.exception.EntityNotFoundException;
-import com.zotov.edu.passportofficerestservice.model.entity.Passport;
 import com.zotov.edu.passportofficerestservice.model.entity.Person;
 import com.zotov.edu.passportofficerestservice.model.request.PersonRequest;
 import com.zotov.edu.passportofficerestservice.model.response.PersonResponse;
@@ -14,7 +13,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -38,22 +38,25 @@ public class PersonService {
     }
 
     public PersonResponse getPerson(String id) {
-        Person person = personsRepository.findById(id)
+        return personsRepository
+                .findById(id)
+                .map(personConverter::convertToDto)
                 .orElseThrow(() -> new EntityNotFoundException(id));
-        return personConverter.convertToDto(person);
     }
 
     public PersonResponse updatePerson(String id, PersonRequest personRequest) {
-        Person person = personConverter.convertToEntity(id, personRequest);
         checkIfPersonExists(id);
+        Person person = personConverter.convertToEntity(id, personRequest);
         Person updatedPerson = personsRepository.save(person);
         return personConverter.convertToDto(updatedPerson);
     }
 
     public Page<PersonResponse> getPersonByPassportNumber(String passportNumber) {
-        Passport passport = passportsRepository.findById(passportNumber)
-                .orElseThrow(() -> new EntityNotFoundException(passportNumber));
-        return new PageImpl<>(Collections.singletonList(getPerson(passport.getOwnerId())));
+        List<PersonResponse> foundPersons = new ArrayList<>();
+        passportsRepository
+                .findById(passportNumber)
+                .ifPresent(passport -> foundPersons.add(getPerson(passport.getOwnerId())));
+        return new PageImpl<>(foundPersons);
     }
 
     public void deletePersonById(String id) {

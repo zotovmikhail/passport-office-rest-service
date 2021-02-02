@@ -10,7 +10,7 @@ import java.util.List;
 public interface PassportConverter {
     PassportResponse convertToDto(Passport passport);
 
-    Passport covertToEntity(String id, PassportRequest passportRequest);
+    Passport convertToEntity(String id, PassportRequest passportRequest);
 
     List<PassportResponse> convertToDto(List<Passport> passport);
 
