@@ -1,11 +1,12 @@
-package com.zotov.edu.passportofficerestservice.model.request;
+package com.zotov.edu.passportofficerestservice.controller.dto.request;
 
-import com.zotov.edu.passportofficerestservice.validator.Country;
+import com.zotov.edu.passportofficerestservice.controller.validator.Country;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 public final class PersonRequest {
 
     @NotNull
+    @NotEmpty
     private final String name;
 
     @NotNull

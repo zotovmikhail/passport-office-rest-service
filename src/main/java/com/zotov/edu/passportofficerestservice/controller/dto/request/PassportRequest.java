@@ -1,4 +1,4 @@
-package com.zotov.edu.passportofficerestservice.model.request;
+package com.zotov.edu.passportofficerestservice.controller.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

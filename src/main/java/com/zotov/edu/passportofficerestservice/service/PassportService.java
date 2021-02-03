@@ -1,14 +1,11 @@
 package com.zotov.edu.passportofficerestservice.service;
 
-import com.zotov.edu.passportofficerestservice.converter.PassportConverter;
-import com.zotov.edu.passportofficerestservice.exception.EntityNotFoundException;
-import com.zotov.edu.passportofficerestservice.exception.PassportIsAlreadyLostException;
-import com.zotov.edu.passportofficerestservice.model.entity.Passport;
-import com.zotov.edu.passportofficerestservice.model.entity.PassportState;
-import com.zotov.edu.passportofficerestservice.model.request.PassportPutRequest;
-import com.zotov.edu.passportofficerestservice.model.request.PassportRequest;
-import com.zotov.edu.passportofficerestservice.model.response.PassportResponse;
 import com.zotov.edu.passportofficerestservice.repository.PassportsRepository;
+import com.zotov.edu.passportofficerestservice.repository.converter.PassportEntityConverter;
+import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
+import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.service.exception.EntityNotFoundException;
+import com.zotov.edu.passportofficerestservice.service.exception.PassportIsAlreadyLostException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,24 +17,21 @@ import java.util.List;
 @AllArgsConstructor
 public class PassportService {
 
-    private final PassportConverter passportConverter;
+    private final PassportEntityConverter passportConverter;
 
     private final PassportsRepository passportsRepository;
 
-    public PassportResponse createPassport(String id, PassportRequest passportRequest) {
-        Passport passport = passportConverter.convertToEntity(id, passportRequest);
-        return passportConverter.convertToDto(passportsRepository.save(passport));
+    public Passport createPassport(String id, String number, LocalDate givenDate, String departmentCode) {
+        Passport passport = passportConverter.convertToEntity(id, number, givenDate, departmentCode);
+        return passportsRepository.save(passport);
     }
 
-    public List<PassportResponse> getPassports(String id, PassportState state) {
-        List<Passport> passports = passportsRepository.findByOwnerIdAndState(id, state);
-        return passportConverter.convertToDto(passports);
+    public List<Passport> getPassports(String id, PassportState state) {
+        return passportsRepository.findByOwnerIdAndState(id, state);
     }
 
-    public List<PassportResponse> getPassportsByGivenDateRange(String ownerId,
-                                                               PassportState state,
-                                                               LocalDate minGivenDate,
-                                                               LocalDate maxGivenDate) {
+    public List<Passport> getPassportsByGivenDateRange(String ownerId, PassportState state,
+                                                       LocalDate minGivenDate, LocalDate maxGivenDate) {
         List<Passport> passports = new ArrayList<>();
         if (minGivenDate != null && maxGivenDate != null) {
             passports.addAll(passportsRepository
@@ -50,20 +44,20 @@ public class PassportService {
                     .findAllByOwnerIdAndStateAndGivenDateLessThan(ownerId, state, maxGivenDate));
         }
 
-        return passportConverter.convertToDto(passports);
+        return passports;
     }
 
-    public PassportResponse getPassportByOwnerIdAndNumber(String passportNumber) {
-        Passport passport = passportsRepository
+    public Passport getPassportByOwnerIdAndNumber(String passportNumber) {
+        return passportsRepository
                 .findById(passportNumber)
                 .orElseThrow(() -> new EntityNotFoundException(passportNumber));
-        return passportConverter.convertToDto(passport);
     }
 
-    public PassportResponse updatePassport(String passportNumber, PassportPutRequest passportRequest) {
+    public Passport updatePassport(String passportNumber, LocalDate givenDate, String departmentCode) {
         Passport passport = getPassportByPassportNumber(passportNumber);
-        Passport updatedPassport = passportConverter.updateEntityFromDto(passportRequest, passport);
-        return passportConverter.convertToDto(passportsRepository.save(updatedPassport));
+        Passport updatedPassport = passportConverter
+                .updateEntityFromDto(givenDate, departmentCode, passport);
+        return passportsRepository.save(updatedPassport);
     }
 
     public void deletePassport(String passportNumber) {
@@ -71,11 +65,11 @@ public class PassportService {
         passportsRepository.deleteById(passportNumber);
     }
 
-    public PassportResponse losePassport(String passportNumber) {
+    public Passport losePassport(String passportNumber) {
         Passport passport = getPassportByPassportNumber(passportNumber);
         checkIfPassportAlreadyLost(passport);
         Passport lostPassport = passportConverter.makePassportLost(passport);
-        return passportConverter.convertToDto(passportsRepository.save(lostPassport));
+        return passportsRepository.save(lostPassport);
     }
 
     private Passport getPassportByPassportNumber(String passportNumber) {
@@ -84,17 +78,15 @@ public class PassportService {
                 .orElseThrow(() -> new EntityNotFoundException(passportNumber));
     }
 
-    private PassportService checkIfPassportAlreadyLost(Passport passport) {
+    private void checkIfPassportAlreadyLost(Passport passport) {
         if (!passport.isActive()) {
             throw new PassportIsAlreadyLostException(passport.getNumber());
         }
-        return this;
     }
 
-    private PassportService checkIfPassportExists(String id) {
+    private void checkIfPassportExists(String id) {
         if (!passportsRepository.existsById(id)) {
             throw new EntityNotFoundException(id);
         }
-        return this;
     }
 }

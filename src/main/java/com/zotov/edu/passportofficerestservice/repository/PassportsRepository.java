@@ -1,7 +1,7 @@
 package com.zotov.edu.passportofficerestservice.repository;
 
-import com.zotov.edu.passportofficerestservice.model.entity.Passport;
-import com.zotov.edu.passportofficerestservice.model.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
+import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 
 import java.time.LocalDate;
 import java.util.Collection;

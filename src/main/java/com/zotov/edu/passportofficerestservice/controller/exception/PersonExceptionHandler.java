@@ -1,6 +1,8 @@
-package com.zotov.edu.passportofficerestservice.exception;
+package com.zotov.edu.passportofficerestservice.controller.exception;
 
-import com.zotov.edu.passportofficerestservice.model.response.ErrorResponse;
+import com.zotov.edu.passportofficerestservice.controller.dto.response.ErrorResponse;
+import com.zotov.edu.passportofficerestservice.service.exception.EntityNotFoundException;
+import com.zotov.edu.passportofficerestservice.service.exception.PassportIsAlreadyLostException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;

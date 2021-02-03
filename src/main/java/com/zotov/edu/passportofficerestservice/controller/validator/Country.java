@@ -1,4 +1,4 @@
-package com.zotov.edu.passportofficerestservice.validator;
+package com.zotov.edu.passportofficerestservice.controller.validator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

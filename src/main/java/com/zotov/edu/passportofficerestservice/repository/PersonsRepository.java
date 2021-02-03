@@ -1,6 +1,6 @@
 package com.zotov.edu.passportofficerestservice.repository;
 
-import com.zotov.edu.passportofficerestservice.model.entity.Person;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

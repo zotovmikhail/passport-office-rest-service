@@ -1,15 +1,17 @@
-package com.zotov.edu.passportofficerestservice.model.response;
+package com.zotov.edu.passportofficerestservice.repository.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @AllArgsConstructor
+@NonNull
 @Getter
-@NotNull
-public final class PersonResponse {
+@EqualsAndHashCode
+public final class Person {
 
     private final String id;
 
@@ -18,4 +20,5 @@ public final class PersonResponse {
     private final LocalDate birthday;
 
     private final String country;
+
 }

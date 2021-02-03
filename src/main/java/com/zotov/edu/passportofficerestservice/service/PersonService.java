@@ -1,18 +1,17 @@
 package com.zotov.edu.passportofficerestservice.service;
 
-import com.zotov.edu.passportofficerestservice.converter.PersonConverter;
-import com.zotov.edu.passportofficerestservice.exception.EntityNotFoundException;
-import com.zotov.edu.passportofficerestservice.model.entity.Person;
-import com.zotov.edu.passportofficerestservice.model.request.PersonRequest;
-import com.zotov.edu.passportofficerestservice.model.response.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.PassportsRepositoryCollections;
 import com.zotov.edu.passportofficerestservice.repository.PersonsRepositoryCollections;
+import com.zotov.edu.passportofficerestservice.repository.converter.PersonEntityConverter;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.service.exception.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,35 +23,31 @@ public class PersonService {
 
     private final PassportsRepositoryCollections passportsRepository;
 
-    private final PersonConverter personConverter;
+    private final PersonEntityConverter personConverter;
 
-    public Page<PersonResponse> getAllPersons(Pageable pageable) {
-        Page<Person> personPage = personsRepository.findAll(pageable);
-        return personConverter.convertToDto(personPage);
+    public Page<Person> getAllPersons(Pageable pageable) {
+        return personsRepository.findAll(pageable);
     }
 
-    public PersonResponse createPerson(PersonRequest personRequest) {
-        Person person = personConverter.convertToEntity(personRequest);
-        Person createdPerson = personsRepository.save(person);
-        return personConverter.convertToDto(createdPerson);
+    public Person createPerson(String name, LocalDate birthday, String country) {
+        Person person = personConverter.convertToEntity(name, birthday, country);
+        return personsRepository.save(person);
     }
 
-    public PersonResponse getPerson(String id) {
+    public Person getPerson(String id) {
         return personsRepository
                 .findById(id)
-                .map(personConverter::convertToDto)
                 .orElseThrow(() -> new EntityNotFoundException(id));
     }
 
-    public PersonResponse updatePerson(String id, PersonRequest personRequest) {
+    public Person updatePerson(String id, String name, LocalDate birthday, String country) {
         checkIfPersonExists(id);
-        Person person = personConverter.convertToEntity(id, personRequest);
-        Person updatedPerson = personsRepository.save(person);
-        return personConverter.convertToDto(updatedPerson);
+        Person person = personConverter.convertToEntity(id, name, birthday, country);
+        return personsRepository.save(person);
     }
 
-    public Page<PersonResponse> getPersonByPassportNumber(String passportNumber) {
-        List<PersonResponse> foundPersons = new ArrayList<>();
+    public Page<Person> getPersonByPassportNumber(String passportNumber) {
+        List<Person> foundPersons = new ArrayList<>();
         passportsRepository
                 .findById(passportNumber)
                 .ifPresent(passport -> foundPersons.add(getPerson(passport.getOwnerId())));
@@ -64,11 +59,10 @@ public class PersonService {
         personsRepository.deleteById(id);
     }
 
-    public PersonService checkIfPersonExists(String id) {
+    public void checkIfPersonExists(String id) {
         if (!personsRepository.existsById(id)) {
             throw new EntityNotFoundException(id);
         }
-        return this;
     }
 
 }

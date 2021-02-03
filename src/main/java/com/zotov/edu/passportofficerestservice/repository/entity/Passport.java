@@ -1,4 +1,4 @@
-package com.zotov.edu.passportofficerestservice.model.entity;
+package com.zotov.edu.passportofficerestservice.repository.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

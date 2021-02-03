@@ -1,4 +1,4 @@
-package com.zotov.edu.passportofficerestservice.exception;
+package com.zotov.edu.passportofficerestservice.service.exception;
 
 public class EntityNotFoundException extends RuntimeException {
     public EntityNotFoundException(String message) {

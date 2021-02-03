@@ -1,7 +1,7 @@
 package com.zotov.edu.passportofficerestservice.repository;
 
-import com.zotov.edu.passportofficerestservice.model.entity.Passport;
-import com.zotov.edu.passportofficerestservice.model.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
+import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -34,8 +34,10 @@ public class PassportsRepositoryCollections implements PassportsRepository {
     }
 
     @Override
-    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateBetween(
-            String ownerId, PassportState state, LocalDate minGivenDate, LocalDate maxGivenDate) {
+    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateBetween(String ownerId,
+                                                                            PassportState state,
+                                                                            LocalDate minGivenDate,
+                                                                            LocalDate maxGivenDate) {
         return passports
                 .values()
                 .stream()
@@ -48,8 +50,9 @@ public class PassportsRepositoryCollections implements PassportsRepository {
     }
 
     @Override
-    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateGreaterThan(
-            String ownerId, PassportState state, LocalDate minGivenDate) {
+    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateGreaterThan(String ownerId,
+                                                                                PassportState state,
+                                                                                LocalDate minGivenDate) {
         return passports
                 .values()
                 .stream()
