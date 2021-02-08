@@ -28,7 +28,7 @@ public class PersonsRepositoryCollections implements PersonsRepository {
             count++;
         }
 
-        return new PageImpl<>(personsFromData);
+        return new PageImpl<>(personsFromData, pageable, persons.size());
     }
 
     @Override

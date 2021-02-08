@@ -4,8 +4,6 @@ import com.zotov.edu.passportofficerestservice.controller.dto.response.PassportR
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,20 +22,11 @@ public class PassportControllerDtoConverter {
         return passport.stream().map(this::convertPassportToDto).collect(Collectors.toList());
     }
 
-    public Page<PersonResponse> convertPersonToDto(Page<Person> personPage) {
-        List<PersonResponse> personResponses = convertPersonListToDto(personPage.getContent());
-        return new PageImpl<>(personResponses);
-    }
-
     public PersonResponse convertPersonToDto(Person person) {
         return new PersonResponse(
                 person.getId(),
                 person.getName(),
                 person.getBirthday(),
                 person.getCountry());
-    }
-
-    public List<PersonResponse> convertPersonListToDto(List<Person> persons) {
-        return persons.stream().map(this::convertPersonToDto).collect(Collectors.toList());
     }
 }

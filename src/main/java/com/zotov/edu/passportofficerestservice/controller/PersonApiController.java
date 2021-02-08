@@ -38,10 +38,10 @@ public class PersonApiController {
     @GetMapping
     public Page<PersonResponse> getPersons(@RequestParam(required = false) Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
-        Page<Person> foundPersons = passportNumber
+        return passportNumber
                 .map(personsService::getPersonByPassportNumber)
-                .orElseGet(() -> personsService.getAllPersons(pageable));
-        return passportControllerDtoConverter.convertPersonToDto(foundPersons);
+                .orElseGet(() -> personsService.getAllPersons(pageable))
+                .map(passportControllerDtoConverter::convertPersonToDto);
     }
 
     @PostMapping()
