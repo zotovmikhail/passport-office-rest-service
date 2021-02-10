@@ -6,35 +6,33 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class PersonsRepositoryCollections implements PersonsRepository {
 
-    NavigableMap<String, Person> persons = new TreeMap<>();
+    Map<String, Person> persons = new LinkedHashMap<>();
 
     @Override
     public Page<Person> findAll(Pageable pageable) {
-        List<Person> personsFromData = new ArrayList<>();
-
-        Iterator<Map.Entry<String, Person>> it = persons.entrySet().iterator();
-        for (int i = 0; i < pageable.getOffset() && it.hasNext(); i++) {
-            it.next();
-        }
-
-        int count = 0;
-        while (count < pageable.getPageSize() && it.hasNext()) {
-            personsFromData.add(it.next().getValue());
-            count++;
-        }
+        List<Person> personsFromData = persons.entrySet()
+                .stream()
+                .skip(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
         return new PageImpl<>(personsFromData, pageable, persons.size());
     }
 
     @Override
-    public Person save(Person s) {
-        persons.put(s.getId(), s);
-        return persons.get(s.getId());
+    public Person save(Person person) {
+        persons.put(person.getId(), person);
+        return person;
     }
 
     @Override

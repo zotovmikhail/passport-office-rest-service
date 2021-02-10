@@ -28,12 +28,12 @@ public class PassportEntityConverter {
         );
     }
 
-    public Passport convertToEntity(String id, String number, LocalDate givenDate, String departmentCode) {
+    public Passport convertToEntity(String passportNumber, LocalDate givenDate, String departmentCode, String ownerId) {
         return new Passport(
-                number,
+                passportNumber,
                 givenDate,
                 departmentCode,
                 PassportState.ACTIVE,
-                id);
+                ownerId);
     }
 }

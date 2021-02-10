@@ -4,13 +4,12 @@ import com.zotov.edu.passportofficerestservice.repository.PassportsRepository;
 import com.zotov.edu.passportofficerestservice.repository.converter.PassportEntityConverter;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
-import com.zotov.edu.passportofficerestservice.service.exception.EntityNotFoundException;
 import com.zotov.edu.passportofficerestservice.service.exception.PassportIsAlreadyLostException;
+import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,43 +20,27 @@ public class PassportService {
 
     private final PassportsRepository passportsRepository;
 
-    public Passport createPassport(String id, String number, LocalDate givenDate, String departmentCode) {
-        Passport passport = passportConverter.convertToEntity(id, number, givenDate, departmentCode);
+    public Passport createPassport(String personId, String number, LocalDate givenDate, String departmentCode) {
+        Passport passport = passportConverter.convertToEntity(number, givenDate, departmentCode, personId);
         return passportsRepository.save(passport);
     }
 
-    public List<Passport> getPassports(String id, PassportState state) {
-        return passportsRepository.findByOwnerIdAndState(id, state);
-    }
-
-    public List<Passport> getPassportsByGivenDateRange(String ownerId, PassportState state,
-                                                       LocalDate minGivenDate, LocalDate maxGivenDate) {
-        List<Passport> passports = new ArrayList<>();
-        if (minGivenDate != null && maxGivenDate != null) {
-            passports.addAll(passportsRepository
-                    .findAllByOwnerIdAndStateAndGivenDateBetween(ownerId, state, minGivenDate, maxGivenDate));
-        } else if (minGivenDate != null) {
-            passports.addAll(passportsRepository
-                    .findAllByOwnerIdAndStateAndGivenDateGreaterThan(ownerId, state, minGivenDate));
-        } else {
-            passports.addAll(passportsRepository
-                    .findAllByOwnerIdAndStateAndGivenDateLessThan(ownerId, state, maxGivenDate));
-        }
-
-        return passports;
+    public List<Passport> getPassports(String personId, PassportState state,
+                                       LocalDate minGivenDate, LocalDate maxGivenDate) {
+        return passportsRepository.findByOwnerIdAndStateAndGivenDateBetween(personId, state, minGivenDate, maxGivenDate);
     }
 
     public Passport getPassportByOwnerIdAndNumber(String passportNumber) {
         return passportsRepository
                 .findById(passportNumber)
-                .orElseThrow(() -> new EntityNotFoundException(passportNumber));
+                .orElseThrow(() -> new PassportNotFoundException(passportNumber));
     }
 
     public Passport updatePassport(String passportNumber, LocalDate givenDate, String departmentCode) {
         Passport passport = getPassportByPassportNumber(passportNumber);
         Passport updatedPassport = passportConverter
                 .updateEntityFromDto(givenDate, departmentCode, passport);
-        return passportsRepository.save(updatedPassport);
+        return passportsRepository.merge(updatedPassport);
     }
 
     public void deletePassport(String passportNumber) {
@@ -69,13 +52,13 @@ public class PassportService {
         Passport passport = getPassportByPassportNumber(passportNumber);
         checkIfPassportAlreadyLost(passport);
         Passport lostPassport = passportConverter.makePassportLost(passport);
-        return passportsRepository.save(lostPassport);
+        return passportsRepository.merge(lostPassport);
     }
 
     private Passport getPassportByPassportNumber(String passportNumber) {
         return passportsRepository
                 .findById(passportNumber)
-                .orElseThrow(() -> new EntityNotFoundException(passportNumber));
+                .orElseThrow(() -> new PassportNotFoundException(passportNumber));
     }
 
     private void checkIfPassportAlreadyLost(Passport passport) {
@@ -84,9 +67,9 @@ public class PassportService {
         }
     }
 
-    private void checkIfPassportExists(String id) {
-        if (!passportsRepository.existsById(id)) {
-            throw new EntityNotFoundException(id);
+    private void checkIfPassportExists(String passportNumber) {
+        if (!passportsRepository.existsById(passportNumber)) {
+            throw new PassportNotFoundException(passportNumber);
         }
     }
 }

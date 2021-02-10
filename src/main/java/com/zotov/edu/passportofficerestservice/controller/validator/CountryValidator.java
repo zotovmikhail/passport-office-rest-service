@@ -7,7 +7,7 @@ import javax.validation.ConstraintValidatorContext;
 
 public class CountryValidator implements ConstraintValidator<Country, String> {
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-        return CountryCode.getByCode(s.toUpperCase()) != null;
+    public boolean isValid(String country, ConstraintValidatorContext constraintValidatorContext) {
+        return CountryCode.getByCode(country.toUpperCase()) != null;
     }
 }

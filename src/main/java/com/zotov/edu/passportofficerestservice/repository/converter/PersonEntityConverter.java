@@ -10,7 +10,7 @@ import java.util.UUID;
 public class PersonEntityConverter {
 
     public Person convertToEntity(String name, LocalDate birthday, String country) {
-        return new Person(
+        return convertToEntity(
                 UUID.randomUUID().toString(),
                 name,
                 birthday,

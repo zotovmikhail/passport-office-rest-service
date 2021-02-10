@@ -4,7 +4,7 @@ import com.zotov.edu.passportofficerestservice.repository.PassportsRepositoryCol
 import com.zotov.edu.passportofficerestservice.repository.PersonsRepositoryCollections;
 import com.zotov.edu.passportofficerestservice.repository.converter.PersonEntityConverter;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
-import com.zotov.edu.passportofficerestservice.service.exception.EntityNotFoundException;
+import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,15 +34,15 @@ public class PersonService {
         return personsRepository.save(person);
     }
 
-    public Person getPerson(String id) {
+    public Person getPerson(String personId) {
         return personsRepository
-                .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(id));
+                .findById(personId)
+                .orElseThrow(() -> new PersonNotFoundException(personId));
     }
 
-    public Person updatePerson(String id, String name, LocalDate birthday, String country) {
-        checkIfPersonExists(id);
-        Person person = personConverter.convertToEntity(id, name, birthday, country);
+    public Person updatePerson(String personId, String name, LocalDate birthday, String country) {
+        checkIfPersonExists(personId);
+        Person person = personConverter.convertToEntity(personId, name, birthday, country);
         return personsRepository.save(person);
     }
 
@@ -54,14 +54,14 @@ public class PersonService {
         return new PageImpl<>(foundPersons);
     }
 
-    public void deletePersonById(String id) {
-        checkIfPersonExists(id);
-        personsRepository.deleteById(id);
+    public void deletePersonById(String personId) {
+        checkIfPersonExists(personId);
+        personsRepository.deleteById(personId);
     }
 
-    public void checkIfPersonExists(String id) {
-        if (!personsRepository.existsById(id)) {
-            throw new EntityNotFoundException(id);
+    public void checkIfPersonExists(String personId) {
+        if (!personsRepository.existsById(personId)) {
+            throw new PersonNotFoundException(personId);
         }
     }
 

@@ -1,8 +1,10 @@
 package com.zotov.edu.passportofficerestservice.controller.exception;
 
 import com.zotov.edu.passportofficerestservice.controller.dto.response.ErrorResponse;
-import com.zotov.edu.passportofficerestservice.service.exception.EntityNotFoundException;
+import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlreadyExistsException;
 import com.zotov.edu.passportofficerestservice.service.exception.PassportIsAlreadyLostException;
+import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
+import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,14 +37,20 @@ public class PersonExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ErrorResponse handlePersonNotFoundException(EntityNotFoundException exception) {
+    @ExceptionHandler({PersonNotFoundException.class, PassportNotFoundException.class})
+    public ErrorResponse handleEntityNotFoundException(RuntimeException exception) {
         return new ErrorResponse(Collections.singletonList(exception.getMessage()));
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(PassportIsAlreadyLostException.class)
     public ErrorResponse handlePassportIsAlreadyLostException(PassportIsAlreadyLostException exception) {
+        return new ErrorResponse(Collections.singletonList(exception.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(PassportAlreadyExistsException.class)
+    public ErrorResponse handlePassportIsAlreadyLostException(PassportAlreadyExistsException exception) {
         return new ErrorResponse(Collections.singletonList(exception.getMessage()));
     }
 }

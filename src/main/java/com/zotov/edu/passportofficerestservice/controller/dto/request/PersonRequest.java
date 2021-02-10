@@ -8,7 +8,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 @AllArgsConstructor
@@ -25,7 +24,6 @@ public final class PersonRequest {
     private final LocalDate birthday;
 
     @NotNull
-    @Pattern(regexp = "[a-zA-Z]{2}")
     @Country
     private final String country;
 }

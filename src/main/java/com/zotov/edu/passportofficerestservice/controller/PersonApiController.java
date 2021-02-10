@@ -36,7 +36,8 @@ public class PersonApiController {
     private final PassportControllerDtoConverter passportControllerDtoConverter;
 
     @GetMapping
-    public Page<PersonResponse> getPersons(@RequestParam(required = false) Optional<String> passportNumber,
+    public Page<PersonResponse> getPersons(@RequestParam(required = false, name = "passportNumber")
+                                                   Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
         return passportNumber
                 .map(personsService::getPersonByPassportNumber)
@@ -52,46 +53,41 @@ public class PersonApiController {
         return passportControllerDtoConverter.convertPersonToDto(createdPerson);
     }
 
-    @GetMapping("/{id}")
-    public PersonResponse getPerson(@PathVariable String id) {
-        return passportControllerDtoConverter.convertPersonToDto(personsService.getPerson(id));
+    @GetMapping("/{personId}")
+    public PersonResponse getPerson(@PathVariable("personId") String personId) {
+        return passportControllerDtoConverter.convertPersonToDto(personsService.getPerson(personId));
     }
 
-    @PutMapping("/{id}")
-    public PersonResponse updatePerson(@PathVariable String id,
+    @PutMapping("/{personId}")
+    public PersonResponse updatePerson(@PathVariable("personId") String personId,
                                        @Valid @RequestBody PersonRequest person) {
         Person updatedPerson = personsService.updatePerson(
-                id, person.getName(), person.getBirthday(), person.getCountry());
+                personId, person.getName(), person.getBirthday(), person.getCountry());
         return passportControllerDtoConverter.convertPersonToDto(updatedPerson);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{personId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePerson(@PathVariable String id) {
-        personsService.deletePersonById(id);
+    public void deletePerson(@PathVariable("personId") String personId) {
+        personsService.deletePersonById(personId);
     }
 
-    @GetMapping("/{id}/passports")
-    public List<PassportResponse> getPassportsByGivenDatesRange(@PathVariable String id,
-                                                                @RequestParam(required = false, defaultValue = "ACTIVE")
+    @GetMapping("/{personId}/passports")
+    public List<PassportResponse> getPassportsByGivenDatesRange(@PathVariable("personId") String personId,
+                                                                @RequestParam(required = false, defaultValue = "ACTIVE", name = "state")
                                                                         PassportState state,
-                                                                @RequestParam(required = false)
+                                                                @RequestParam(required = false, name = "minGivenDate")
                                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate minGivenDate,
-                                                                @RequestParam(required = false)
+                                                                @RequestParam(required = false, name = "maxGivenDate")
                                                                 @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate maxGivenDate) {
-        personsService.checkIfPersonExists(id);
-        List<Passport> foundPassports;
-        if (minGivenDate != null || maxGivenDate != null) {
-            foundPassports = passportService.getPassportsByGivenDateRange(id, state, minGivenDate, maxGivenDate);
-        } else {
-            foundPassports = passportService.getPassports(id, state);
-        }
+        personsService.checkIfPersonExists(personId);
+        List<Passport> foundPassports = passportService.getPassports(personId, state, minGivenDate, maxGivenDate);
         return passportControllerDtoConverter.convertPassportListToDto(foundPassports);
     }
 
     @PostMapping("/{personId}/passports")
     @ResponseStatus(HttpStatus.CREATED)
-    public PassportResponse createPassport(@PathVariable String personId,
+    public PassportResponse createPassport(@PathVariable("personId") String personId,
                                            @Valid @RequestBody PassportRequest passportRequest) {
         personsService.checkIfPersonExists(personId);
         Passport createdPassport = passportService.createPassport(
@@ -101,16 +97,16 @@ public class PersonApiController {
     }
 
     @GetMapping("/{personId}/passports/{passportNumber}")
-    public PassportResponse getPassport(@PathVariable String personId,
-                                        @PathVariable String passportNumber) {
+    public PassportResponse getPassport(@PathVariable("personId") String personId,
+                                        @PathVariable("passportNumber") String passportNumber) {
         personsService.checkIfPersonExists(personId);
         Passport foundPassport = passportService.getPassportByOwnerIdAndNumber(passportNumber);
         return passportControllerDtoConverter.convertPassportToDto(foundPassport);
     }
 
     @PutMapping("/{personId}/passports/{passportNumber}")
-    public PassportResponse updatePerson(@PathVariable String personId,
-                                         @PathVariable String passportNumber,
+    public PassportResponse updatePerson(@PathVariable("personId") String personId,
+                                         @PathVariable("passportNumber") String passportNumber,
                                          @RequestBody PassportPutRequest passportRequest) {
         personsService.checkIfPersonExists(personId);
         Passport updatedPassport = passportService.updatePassport(
@@ -120,15 +116,15 @@ public class PersonApiController {
 
     @DeleteMapping("/{personId}/passports/{passportNumber}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePassport(@PathVariable String personId,
-                               @PathVariable String passportNumber) {
+    public void deletePassport(@PathVariable("personId") String personId,
+                               @PathVariable("passportNumber") String passportNumber) {
         personsService.checkIfPersonExists(personId);
         passportService.deletePassport(passportNumber);
     }
 
     @PostMapping("/{personId}/passports/{passportNumber}/loss")
-    public PassportResponse losePassport(@PathVariable String personId,
-                                         @PathVariable String passportNumber) {
+    public PassportResponse losePassport(@PathVariable("personId") String personId,
+                                         @PathVariable("passportNumber") String passportNumber) {
         personsService.checkIfPersonExists(personId);
         Passport lostPassport = passportService.losePassport(passportNumber);
         return passportControllerDtoConverter.convertPassportToDto(lostPassport);

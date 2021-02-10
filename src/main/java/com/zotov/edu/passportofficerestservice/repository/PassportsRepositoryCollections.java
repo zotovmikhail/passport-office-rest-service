@@ -2,10 +2,14 @@ package com.zotov.edu.passportofficerestservice.repository;
 
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlreadyExistsException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -15,8 +19,16 @@ public class PassportsRepositoryCollections implements PassportsRepository {
 
     @Override
     public Passport save(Passport passport) {
+        if (existsById(passport.getNumber())) {
+            throw new PassportAlreadyExistsException(passport.getNumber());
+        }
+        return merge(passport);
+    }
+
+    @Override
+    public Passport merge(Passport passport) {
         passports.put(passport.getNumber(), passport);
-        return passports.get(passport.getNumber());
+        return passport;
     }
 
     @Override
@@ -25,60 +37,20 @@ public class PassportsRepositoryCollections implements PassportsRepository {
     }
 
     @Override
-    public List<Passport> findByOwnerIdAndState(String ownerId, PassportState state) {
+    public List<Passport> findByOwnerIdAndStateAndGivenDateBetween(
+            String personId, PassportState state, LocalDate minGivenDate, LocalDate maxGivenDate) {
         return passports
                 .values()
                 .stream()
-                .filter(passport -> passport.getOwnerId().equals(ownerId) && passport.getState().equals(state))
+                .filter(passport -> passport.getOwnerId().equals(personId) && passport.getState().equals(state))
+                .filter(minGivenDate != null ? passport -> passport.getGivenDate().isAfter(minGivenDate) : passport -> true)
+                .filter(maxGivenDate != null ? passport -> passport.getGivenDate().isBefore(maxGivenDate) : passport -> true)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateBetween(String ownerId,
-                                                                            PassportState state,
-                                                                            LocalDate minGivenDate,
-                                                                            LocalDate maxGivenDate) {
-        return passports
-                .values()
-                .stream()
-                .filter(passport ->
-                        passport.getOwnerId().equals(ownerId)
-                                && passport.getState().equals(state)
-                                && passport.getGivenDate().isAfter(minGivenDate)
-                                && passport.getGivenDate().isBefore(maxGivenDate))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateGreaterThan(String ownerId,
-                                                                                PassportState state,
-                                                                                LocalDate minGivenDate) {
-        return passports
-                .values()
-                .stream()
-                .filter(passport ->
-                        passport.getOwnerId().equals(ownerId)
-                                && passport.getState().equals(state)
-                                && passport.getGivenDate().isAfter(minGivenDate))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Collection<Passport> findAllByOwnerIdAndStateAndGivenDateLessThan(
-            String ownerId, PassportState state, LocalDate maxGivenDate) {
-        return passports
-                .values()
-                .stream()
-                .filter(passport ->
-                        passport.getOwnerId().equals(ownerId)
-                                && passport.getState().equals(state)
-                                && passport.getGivenDate().isBefore(maxGivenDate))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existsById(String id) {
-        return passports.containsKey(id);
+    public boolean existsById(String passportNumber) {
+        return passports.containsKey(passportNumber);
     }
 
     @Override
