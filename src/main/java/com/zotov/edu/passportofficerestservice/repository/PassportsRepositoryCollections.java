@@ -66,6 +66,7 @@ public class PassportsRepositoryCollections implements PassportsRepository {
         passports.values()
                 .stream()
                 .filter(passport -> passport.getOwnerId().equals(ownerId))
+                .collect(Collectors.toList())
                 .forEach(passport -> passports.remove(passport.getNumber()));
     }
 }
