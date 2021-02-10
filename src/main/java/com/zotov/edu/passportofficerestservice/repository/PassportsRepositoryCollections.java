@@ -3,6 +3,7 @@ package com.zotov.edu.passportofficerestservice.repository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlreadyExistsException;
+import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -55,6 +56,8 @@ public class PassportsRepositoryCollections implements PassportsRepository {
 
     @Override
     public void deleteById(String passportNumber) {
-        passports.remove(passportNumber);
+        if (passports.remove(passportNumber) == null) {
+            throw new PassportNotFoundException(passportNumber);
+        }
     }
 }

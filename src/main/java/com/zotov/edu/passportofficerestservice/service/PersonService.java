@@ -55,7 +55,6 @@ public class PersonService {
     }
 
     public void deletePersonById(String personId) {
-        checkIfPersonExists(personId);
         personsRepository.deleteById(personId);
     }
 

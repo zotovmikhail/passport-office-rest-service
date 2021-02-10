@@ -44,7 +44,6 @@ public class PassportService {
     }
 
     public void deletePassport(String passportNumber) {
-        checkIfPassportExists(passportNumber);
         passportsRepository.deleteById(passportNumber);
     }
 
@@ -64,12 +63,6 @@ public class PassportService {
     private void checkIfPassportAlreadyLost(Passport passport) {
         if (!passport.isActive()) {
             throw new PassportIsAlreadyLostException(passport.getNumber());
-        }
-    }
-
-    private void checkIfPassportExists(String passportNumber) {
-        if (!passportsRepository.existsById(passportNumber)) {
-            throw new PassportNotFoundException(passportNumber);
         }
     }
 }

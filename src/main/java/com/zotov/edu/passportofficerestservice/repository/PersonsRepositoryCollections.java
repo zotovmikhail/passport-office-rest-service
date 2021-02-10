@@ -1,6 +1,7 @@
 package com.zotov.edu.passportofficerestservice.repository;
 
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,8 @@ public class PersonsRepositoryCollections implements PersonsRepository {
 
     @Override
     public void deleteById(String id) {
-        persons.remove(id);
+        if (persons.remove(id) == null) {
+            throw new PersonNotFoundException(id);
+        }
     }
 }
