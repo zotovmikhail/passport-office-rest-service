@@ -56,6 +56,7 @@ public class PersonService {
 
     public void deletePersonById(String personId) {
         personsRepository.deleteById(personId);
+        passportsRepository.deleteAllByOwnerId(personId);
     }
 
     public void checkIfPersonExists(String personId) {

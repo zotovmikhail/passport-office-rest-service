@@ -60,4 +60,12 @@ public class PassportsRepositoryCollections implements PassportsRepository {
             throw new PassportNotFoundException(passportNumber);
         }
     }
+
+    @Override
+    public void deleteAllByOwnerId(String ownerId) {
+        passports.values()
+                .stream()
+                .filter(passport -> passport.getOwnerId().equals(ownerId))
+                .forEach(passport -> passports.remove(passport.getNumber()));
+    }
 }
