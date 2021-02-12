@@ -9,15 +9,6 @@ import java.time.LocalDate;
 @Component
 public class PassportEntityConverter {
 
-    public Passport makePassportLost(Passport passport) {
-        return new Passport(
-                passport.getNumber(),
-                passport.getGivenDate(),
-                passport.getDepartmentCode(),
-                PassportState.LOST,
-                passport.getOwnerId());
-    }
-
     public Passport updateEntityFromDto(LocalDate givenDate, String departmentCode, Passport passport) {
         return new Passport(
                 passport.getNumber(),

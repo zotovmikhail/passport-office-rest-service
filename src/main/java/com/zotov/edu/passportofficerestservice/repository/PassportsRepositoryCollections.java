@@ -19,15 +19,15 @@ public class PassportsRepositoryCollections implements PassportsRepository {
     Map<String, Passport> passports = new HashMap<>();
 
     @Override
-    public Passport save(Passport passport) {
+    public Passport create(Passport passport) {
         if (existsById(passport.getNumber())) {
             throw new PassportAlreadyExistsException(passport.getNumber());
         }
-        return merge(passport);
+        return save(passport);
     }
 
     @Override
-    public Passport merge(Passport passport) {
+    public Passport save(Passport passport) {
         passports.put(passport.getNumber(), passport);
         return passport;
     }

@@ -8,14 +8,17 @@ import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
-@NotNull
 public final class PersonResponse {
 
+    @NotNull
     private final String id;
 
+    @NotNull
     private final String name;
 
+    @NotNull
     private final LocalDate birthday;
 
+    @NotNull
     private final String country;
 }

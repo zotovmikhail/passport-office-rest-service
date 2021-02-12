@@ -7,13 +7,15 @@ import lombok.NonNull;
 import java.time.LocalDate;
 
 @AllArgsConstructor
-@NonNull
 @Getter
 public class PassportResponse {
 
+    @NonNull
     private final String number;
 
+    @NonNull
     private final LocalDate givenDate;
 
+    @NonNull
     private final String departmentCode;
 }

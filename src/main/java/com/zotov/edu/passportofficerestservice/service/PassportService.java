@@ -22,7 +22,7 @@ public class PassportService {
 
     public Passport createPassport(String personId, String number, LocalDate givenDate, String departmentCode) {
         Passport passport = passportConverter.convertToEntity(number, givenDate, departmentCode, personId);
-        return passportsRepository.save(passport);
+        return passportsRepository.create(passport);
     }
 
     public List<Passport> getPassports(String personId, PassportState state,
@@ -40,7 +40,7 @@ public class PassportService {
         Passport passport = getPassportByPassportNumber(passportNumber);
         Passport updatedPassport = passportConverter
                 .updateEntityFromDto(givenDate, departmentCode, passport);
-        return passportsRepository.merge(updatedPassport);
+        return passportsRepository.save(updatedPassport);
     }
 
     public void deletePassport(String passportNumber) {
@@ -50,8 +50,7 @@ public class PassportService {
     public Passport losePassport(String passportNumber) {
         Passport passport = getPassportByPassportNumber(passportNumber);
         checkIfPassportAlreadyLost(passport);
-        Passport lostPassport = passportConverter.makePassportLost(passport);
-        return passportsRepository.merge(lostPassport);
+        return passportsRepository.save(passport.withState(PassportState.LOST));
     }
 
     private Passport getPassportByPassportNumber(String passportNumber) {

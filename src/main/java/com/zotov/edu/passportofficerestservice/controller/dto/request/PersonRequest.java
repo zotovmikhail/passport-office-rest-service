@@ -11,19 +11,19 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @AllArgsConstructor
-@NonNull
 @Getter
 public final class PersonRequest {
 
-    @NotNull
     @NotEmpty
+    @NonNull
     private final String name;
 
     @NotNull
+    @NonNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private final LocalDate birthday;
 
-    @NotNull
     @Country
+    @NonNull
     private final String country;
 }

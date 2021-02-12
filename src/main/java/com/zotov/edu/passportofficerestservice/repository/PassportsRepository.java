@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PassportsRepository {
-    Passport save(Passport passport);
+    Passport create(Passport passport);
 
-    Passport merge(Passport passport);
+    Passport save(Passport passport);
 
     Optional<Passport> findById(String passportNumber);
 

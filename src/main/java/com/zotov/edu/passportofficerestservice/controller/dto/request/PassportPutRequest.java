@@ -9,14 +9,15 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @AllArgsConstructor
-@NonNull
 @Getter
 public final class PassportPutRequest {
 
     @NotNull
+    @NonNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private final LocalDate givenDate;
 
     @NotNull
+    @NonNull
     private final String departmentCode;
 }

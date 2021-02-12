@@ -370,12 +370,12 @@ components:
             properties:
               name:
                 type: string
+                minLength: 1
               birthday:
                 type: string
                 format: date
               country:
                 type: string
-                pattern: "[a-zA-Z]{2}"
             required:
               - name
               - birthday
@@ -389,11 +389,13 @@ components:
             properties:
               number:
                 type: string
+                minLength: 1
               givenDate:
                 type: string
                 format: date
               departmentCode:
                 type: string
+                minLength: 1
             required:
               - number
               - givenDate
@@ -410,8 +412,8 @@ components:
                 format: date
               departmentCode:
                 type: string
+                minLength: 1
             required:
-              - number
               - givenDate
               - departmentCode
   responses:
@@ -432,7 +434,6 @@ components:
                 format: date
               country:
                 type: string
-                pattern: "[a-zA-Z]{2}"
     PersonsResponse:
       description: A persons request
       content:
@@ -456,7 +457,6 @@ components:
                           format: date
                         country:
                           type: string
-                          pattern: "[a-zA-Z]{2}"
               number:
                 type: integer
               size:

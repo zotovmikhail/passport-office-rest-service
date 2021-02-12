@@ -8,17 +8,20 @@ import lombok.NonNull;
 import java.time.LocalDate;
 
 @AllArgsConstructor
-@NonNull
 @Getter
 @EqualsAndHashCode
 public final class Person {
 
+    @NonNull
     private final String id;
 
+    @NonNull
     private final String name;
 
+    @NonNull
     private final LocalDate birthday;
 
+    @NonNull
     private final String country;
 
 }

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,7 @@ public class LoggerAdvice {
         return response;
     }
 
-    @After(value = "within(@org.springframework.web.bind.annotation.RestControllerAdvice *)")
+    @AfterThrowing(value = "within(@org.springframework.web.bind.annotation.RestControllerAdvice *)")
     public void logAdviceController(JoinPoint joinPoint) {
         String className = joinPoint.getTarget().getClass().toString();
         String methodName = joinPoint.getSignature().getName();

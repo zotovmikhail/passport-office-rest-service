@@ -7,10 +7,11 @@ import java.time.Instant;
 import java.util.List;
 
 @Getter
-@NonNull
 public final class ErrorResponse {
+    @NonNull
     private final Instant timestamp;
 
+    @NonNull
     private final List<String> messages;
 
     public ErrorResponse(List<String> messages) {
