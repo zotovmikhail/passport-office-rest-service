@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -15,6 +16,6 @@ public final class PassportPutRequest {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private final LocalDate givenDate;
 
-    @NotNull
+    @NotEmpty
     private final String departmentCode;
 }
