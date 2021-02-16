@@ -3,7 +3,6 @@ package com.zotov.edu.passportofficerestservice.controller.dto.request;
 import com.zotov.edu.passportofficerestservice.controller.validator.Country;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotEmpty;
@@ -15,15 +14,13 @@ import java.time.LocalDate;
 public final class PersonRequest {
 
     @NotEmpty
-    @NonNull
     private final String name;
 
     @NotNull
-    @NonNull
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private final LocalDate birthday;
 
     @Country
-    @NonNull
+    @NotNull
     private final String country;
 }

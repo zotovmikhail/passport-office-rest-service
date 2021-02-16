@@ -2,23 +2,23 @@ package com.zotov.edu.passportofficerestservice.controller.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
 public final class PersonResponse {
 
-    @NotNull
+    @NonNull
     private final String id;
 
-    @NotNull
+    @NonNull
     private final String name;
 
-    @NotNull
+    @NonNull
     private final LocalDate birthday;
 
-    @NotNull
+    @NonNull
     private final String country;
 }

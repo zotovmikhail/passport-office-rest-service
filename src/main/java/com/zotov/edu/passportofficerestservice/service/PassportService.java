@@ -32,7 +32,7 @@ public class PassportService {
 
     public Passport getPassportByOwnerIdAndNumber(String passportNumber) {
         return passportsRepository
-                .findById(passportNumber)
+                .findByPassportNumber(passportNumber)
                 .orElseThrow(() -> new PassportNotFoundException(passportNumber));
     }
 
@@ -55,7 +55,7 @@ public class PassportService {
 
     private Passport getPassportByPassportNumber(String passportNumber) {
         return passportsRepository
-                .findById(passportNumber)
+                .findByPassportNumber(passportNumber)
                 .orElseThrow(() -> new PassportNotFoundException(passportNumber));
     }
 

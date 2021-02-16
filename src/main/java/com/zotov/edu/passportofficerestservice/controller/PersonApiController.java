@@ -36,6 +36,7 @@ public class PersonApiController {
     private final PassportControllerDtoConverter passportControllerDtoConverter;
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public Page<PersonResponse> getPersons(@RequestParam(required = false, name = "passportNumber")
                                                    Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
@@ -54,11 +55,13 @@ public class PersonApiController {
     }
 
     @GetMapping("/{personId}")
+    @ResponseStatus(HttpStatus.OK)
     public PersonResponse getPerson(@PathVariable("personId") String personId) {
         return passportControllerDtoConverter.convertPersonToDto(personsService.getPerson(personId));
     }
 
     @PutMapping("/{personId}")
+    @ResponseStatus(HttpStatus.OK)
     public PersonResponse updatePerson(@PathVariable("personId") String personId,
                                        @Valid @RequestBody PersonRequest person) {
         Person updatedPerson = personsService.updatePerson(
@@ -73,6 +76,7 @@ public class PersonApiController {
     }
 
     @GetMapping("/{personId}/passports")
+    @ResponseStatus(HttpStatus.OK)
     public List<PassportResponse> getPassportsByGivenDatesRange(@PathVariable("personId") String personId,
                                                                 @RequestParam(required = false, defaultValue = "ACTIVE", name = "state")
                                                                         PassportState state,
@@ -97,6 +101,7 @@ public class PersonApiController {
     }
 
     @GetMapping("/{personId}/passports/{passportNumber}")
+    @ResponseStatus(HttpStatus.OK)
     public PassportResponse getPassport(@PathVariable("personId") String personId,
                                         @PathVariable("passportNumber") String passportNumber) {
         personsService.checkIfPersonExists(personId);
@@ -105,6 +110,7 @@ public class PersonApiController {
     }
 
     @PutMapping("/{personId}/passports/{passportNumber}")
+    @ResponseStatus(HttpStatus.OK)
     public PassportResponse updatePerson(@PathVariable("personId") String personId,
                                          @PathVariable("passportNumber") String passportNumber,
                                          @RequestBody PassportPutRequest passportRequest) {
@@ -123,6 +129,7 @@ public class PersonApiController {
     }
 
     @PostMapping("/{personId}/passports/{passportNumber}/loss")
+    @ResponseStatus(HttpStatus.OK)
     public PassportResponse losePassport(@PathVariable("personId") String personId,
                                          @PathVariable("passportNumber") String passportNumber) {
         personsService.checkIfPersonExists(personId);

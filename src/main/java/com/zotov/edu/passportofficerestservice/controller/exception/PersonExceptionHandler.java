@@ -31,14 +31,20 @@ public class PersonExceptionHandler {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(HttpMessageNotReadableException .class)
-    public ErrorResponse handleHttpMessageNotReadableException (HttpMessageNotReadableException exception) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
         return new ErrorResponse(Collections.singletonList(exception.getMessage()));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({PersonNotFoundException.class, PassportNotFoundException.class})
-    public ErrorResponse handleEntityNotFoundException(RuntimeException exception) {
+    @ExceptionHandler(PersonNotFoundException.class)
+    public ErrorResponse handlePersonNotFoundException(PersonNotFoundException exception) {
+        return new ErrorResponse(Collections.singletonList(exception.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(PassportNotFoundException.class)
+    public ErrorResponse handlePassportNotFoundException(PassportNotFoundException exception) {
         return new ErrorResponse(Collections.singletonList(exception.getMessage()));
     }
 

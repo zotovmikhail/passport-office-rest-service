@@ -49,7 +49,7 @@ public class PersonService {
     public Page<Person> getPersonByPassportNumber(String passportNumber) {
         List<Person> foundPersons = new ArrayList<>();
         passportsRepository
-                .findById(passportNumber)
+                .findByPassportNumber(passportNumber)
                 .ifPresent(passport -> foundPersons.add(getPerson(passport.getOwnerId())));
         return new PageImpl<>(foundPersons);
     }

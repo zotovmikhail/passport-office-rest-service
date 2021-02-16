@@ -12,12 +12,10 @@ public interface PassportsRepository {
 
     Passport save(Passport passport);
 
-    Optional<Passport> findById(String passportNumber);
+    Optional<Passport> findByPassportNumber(String passportNumber);
 
     List<Passport> findByOwnerIdAndStateAndGivenDateBetween(
             String personId, PassportState state, LocalDate minGivenDate, LocalDate maxGivenDate);
-
-    boolean existsById(String passportNumber);
 
     void deleteById(String passportNumber);
 

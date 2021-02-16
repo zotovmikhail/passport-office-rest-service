@@ -3,9 +3,7 @@ package com.zotov.edu.passportofficerestservice.advice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -28,16 +26,20 @@ public class LoggerAdvice {
         log.info("Method invoked: {}:{}()\nRequest:\n{}.", className, methodName,
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(methodArgs));
         Object response = joinPoint.proceed();
-        log.info("{}:{}()\nResponse:\n {}",className, methodName,
+        log.info("{}:{}()\nResponse:\n {}", className, methodName,
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return response;
     }
 
-    @AfterThrowing(value = "within(@org.springframework.web.bind.annotation.RestControllerAdvice *)")
-    public void logAdviceController(JoinPoint joinPoint) {
+    @Around(value = "within(@org.springframework.web.bind.annotation.RestControllerAdvice *)")
+    public Object logAdviceController(ProceedingJoinPoint joinPoint) throws Throwable {
         String className = joinPoint.getTarget().getClass().toString();
         String methodName = joinPoint.getSignature().getName();
-        log.info("Exception handler invoked: {}:{}", className, methodName);
-        log.error("Exception occurred: {}",Arrays.toString(joinPoint.getArgs()));
+        log.error("Exception handler invoked: {}:{}", className, methodName);
+        log.error("Exception occurred: {}", Arrays.toString(joinPoint.getArgs()));
+        Object response = joinPoint.proceed();
+        log.info("{}:{}()\nResponse:\n {}", className, methodName,
+                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+        return response;
     }
 }

@@ -20,9 +20,10 @@ public class PassportsRepositoryCollections implements PassportsRepository {
 
     @Override
     public Passport create(Passport passport) {
-        if (existsById(passport.getNumber())) {
-            throw new PassportAlreadyExistsException(passport.getNumber());
-        }
+        findByPassportNumber(passport.getNumber())
+                .ifPresent(foundPassport -> {
+                    throw new PassportAlreadyExistsException(foundPassport.getNumber());
+                });
         return save(passport);
     }
 
@@ -33,7 +34,7 @@ public class PassportsRepositoryCollections implements PassportsRepository {
     }
 
     @Override
-    public Optional<Passport> findById(String passportNumber) {
+    public Optional<Passport> findByPassportNumber(String passportNumber) {
         return Optional.ofNullable(passports.get(passportNumber));
     }
 
@@ -47,11 +48,6 @@ public class PassportsRepositoryCollections implements PassportsRepository {
                 .filter(minGivenDate != null ? passport -> passport.getGivenDate().isAfter(minGivenDate) : passport -> true)
                 .filter(maxGivenDate != null ? passport -> passport.getGivenDate().isBefore(maxGivenDate) : passport -> true)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existsById(String passportNumber) {
-        return passports.containsKey(passportNumber);
     }
 
     @Override
