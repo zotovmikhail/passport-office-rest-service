@@ -18,7 +18,7 @@ paths:
             default: 1
           description: Page number of the results
         - in: query
-          name: pageSize
+          name: size
           schema:
             type: integer
             maximum: 100
@@ -42,7 +42,7 @@ paths:
       description: People managment
       operationId: createPersons
       requestBody:
-        $ref: '#/components/requestBodies/PersonsRequest'
+        $ref: '#/components/requestBodies/PersonRequest'
       responses:
         '201':
           $ref: '#/components/responses/PersonResponse'
@@ -51,7 +51,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
   '/persons/{personId}':
     get:
       tags:
@@ -75,7 +75,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
         - person
@@ -100,19 +100,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: Conflict
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
         - person
@@ -135,7 +135,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
   '/persons/{personId}/passports':
     get:
       tags:
@@ -173,7 +173,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
     post:
       tags:
         - person
@@ -189,22 +189,22 @@ paths:
       description: People managment
       operationId: createActivePassport
       requestBody:
-        $ref: '#/components/requestBodies/PassportsRequest'
+        $ref: '#/components/requestBodies/PassportRequest'
       responses:
         '201':
-          $ref: '#/components/responses/PassportsResponse'
+          $ref: '#/components/responses/PassportResponse'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
   '/persons/{personId}/passports/{passportNumber}':
     get:
       tags:
@@ -234,7 +234,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       tags:
         - person
@@ -256,7 +256,7 @@ paths:
       description: People managment
       operationId: putPassport
       requestBody:
-        $ref: '#/components/requestBodies/PassportRequest'
+        $ref: '#/components/requestBodies/PassportPutRequest'
       responses:
         '200':
           $ref: '#/components/responses/PassportResponse'
@@ -265,19 +265,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: Conflict
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
     delete:
       tags:
         - person
@@ -306,7 +306,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorResponse'
   '/persons/{personId}/passports/{passportNumber}/loss':
     post:
       tags:
@@ -333,135 +333,177 @@ paths:
           $ref: '#/components/responses/PassportResponse'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '409':
           description: A passport can be lost only once
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
-    Person:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        birthday:
-          type: string
-          format: date
-        country:
-          type: string
-          pattern: "[a-zA-Z]{2}"
-          minLength: 2
-          maxLength: 2
-      required:
-        - name
-        - birthday
-        - country
-    Passport:
-      type: object
-      properties:
-        number:
-          type: string
-        givenDate:
-          type: string
-          format: date
-        departmentCode:
-          type: string
-      required:
-        - number
-        - givenDate
-        - departmentCode
     PassportState:
       type: string
       enum:
-        - active
-        - lost
-    Error:
+        - ACTIVE
+        - LOST
+    ErrorResponse:
       type: object
       properties:
-        message:
+        timestamp:
           type: string
-        code:
-          type: string
+        messages:
+          type: array
+          items:
+            oneOf:
+              - type: string
   requestBodies:
     PersonRequest:
-      description: A person
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Person'
-    PersonsRequest:
-      description: A JSON array of persons
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              oneOf:
-                -  type: object
-                   properties:
-                     name:
-                       type: string
-                     birthday:
-                       type: string
-                       format: date
-                     country:
-                       type: string
-                       pattern: "[a-zA-Z]{2}"
-                       minLength: 2
-                       maxLength: 2
-            minItems: 1
-    PassportsRequest:
-      description: A JSON array of passports
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              oneOf:
-                - $ref: '#/components/schemas/Passport'
-    PassportRequest:
-      description: A passport
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Passport'
-  responses:
-    PersonResponse:
-      description: A person
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Person'
-    PersonsResponse:
-      description: A list of persons
+      description: A person request
       content:
         application/json:
           schema:
             type: object
             properties:
-              data:
+              name:
+                type: string
+                minLength: 1
+              birthday:
+                type: string
+                format: date
+              country:
+                type: string
+            required:
+              - name
+              - birthday
+              - country
+    PassportRequest:
+      description: A passport request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              number:
+                type: string
+                minLength: 1
+              givenDate:
+                type: string
+                format: date
+              departmentCode:
+                type: string
+                minLength: 1
+            required:
+              - number
+              - givenDate
+              - departmentCode
+    PassportPutRequest:
+      description: A passport put request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              givenDate:
+                type: string
+                format: date
+              departmentCode:
+                type: string
+                minLength: 1
+            required:
+              - givenDate
+              - departmentCode
+  responses:
+    PersonResponse:
+      description: A person response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              birthday:
+                type: string
+                format: date
+              country:
+                type: string
+    PersonsResponse:
+      description: A persons request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
                 type: array
                 items:
                   oneOf:
-                    - $ref: '#/components/schemas/Person'
-              count:
+                    - type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        name:
+                          type: string
+                        birthday:
+                          type: string
+                          format: date
+                        country:
+                          type: string
+              number:
                 type: integer
-              page:
+              size:
                 type: integer
-    PassportsResponse:
-      description: A list of passports
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              oneOf:
-                - $ref: '#/components/schemas/Passport'
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
     PassportResponse:
-      description: A passport
+      description: A passport response
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Passport'
-
+            type: object
+            properties:
+              number:
+                type: string
+              givenDate:
+                type: string
+                format: date
+              departmentCode:
+                type: string
+    PassportsResponse:
+      description: A passports response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  oneOf:
+                    - type: object
+                      properties:
+                        number:
+                          type: string
+                        givenDate:
+                          type: string
+                          format: date
+                        departmentCode:
+                          type: string
+              number:
+                type: integer
+              size:
+                type: integer
+              totalPages:
+                type: integer
+              totalElements:
+                type: integer
