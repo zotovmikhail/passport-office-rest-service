@@ -46,12 +46,12 @@ public class PersonService {
         return personsRepository.save(person);
     }
 
-    public Page<Person> getPersonByPassportNumber(String passportNumber) {
+    public Page<Person> getPersonByPassportNumber(String passportNumber, Pageable pageable) {
         List<Person> foundPersons = new ArrayList<>();
         passportsRepository
                 .findByPassportNumber(passportNumber)
                 .ifPresent(passport -> foundPersons.add(getPerson(passport.getOwnerId())));
-        return new PageImpl<>(foundPersons);
+        return new PageImpl<>(foundPersons, pageable, foundPersons.size());
     }
 
     public void deletePersonById(String personId) {

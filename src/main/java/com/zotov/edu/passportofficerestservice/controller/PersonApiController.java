@@ -41,7 +41,7 @@ public class PersonApiController {
                                                    Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
         return passportNumber
-                .map(personsService::getPersonByPassportNumber)
+                .map(existentPassportNumber -> personsService.getPersonByPassportNumber(existentPassportNumber, pageable))
                 .orElseGet(() -> personsService.getAllPersons(pageable))
                 .map(passportControllerDtoConverter::convertPersonToDto);
     }

@@ -56,7 +56,7 @@ public class PersonExceptionHandler {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(PassportAlreadyExistsException.class)
-    public ErrorResponse handlePassportIsAlreadyLostException(PassportAlreadyExistsException exception) {
+    public ErrorResponse handlePassportAlreadyExistsException(PassportAlreadyExistsException exception) {
         return new ErrorResponse(Collections.singletonList(exception.getMessage()));
     }
 }
