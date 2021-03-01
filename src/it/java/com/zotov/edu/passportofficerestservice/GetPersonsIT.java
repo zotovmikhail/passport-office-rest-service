@@ -1,8 +1,8 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
+import com.zotov.edu.passportofficerestservice.model.PageResponse;
 import com.zotov.edu.passportofficerestservice.model.Person;
-import com.zotov.edu.passportofficerestservice.model.PersonsPageResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,8 +34,8 @@ class GetPersonsIT extends PersonBaseTest {
     @MethodSource("getListOfPersons")
     void testGetPersonsAndVerifyDefaultValues(List<Person> expectedPersons) {
         expectedPersons.forEach(person -> person.setId(postForPersonResponse(person).getId()));
-        PersonsPageResponse personsPageResponse = getForPersonResponse();
-        verifyPersonsPageResponse(expectedPersons, personsPageResponse, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER);
+        PageResponse<Person> pageResponse = getForPersonResponse();
+        verifyPersonsPageResponse(expectedPersons, pageResponse, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER);
     }
 
     private static Stream<Arguments> getListOfPersonsWithPageSizeAndPageNumber() {
@@ -49,8 +49,8 @@ class GetPersonsIT extends PersonBaseTest {
     @MethodSource("getListOfPersonsWithPageSizeAndPageNumber")
     void testGetPersonsAndVerify(List<Person> expectedPersons, int pageSize, int pageNumber) {
         expectedPersons.forEach(person -> person.setId(postForPersonResponse(person).getId()));
-        PersonsPageResponse personsPageResponse = getForPersonResponseByPassportNumber(String.valueOf(pageSize), String.valueOf(pageNumber));
-        verifyPersonsPageResponse(expectedPersons, personsPageResponse, pageSize, pageNumber);
+        PageResponse<Person> pageResponse = getForPersonResponseByPassportNumber(String.valueOf(pageSize), String.valueOf(pageNumber));
+        verifyPersonsPageResponse(expectedPersons, pageResponse, pageSize, pageNumber);
     }
 
     private static Stream<Arguments> getListOfPersonsWithPassportNumber() {
@@ -63,8 +63,8 @@ class GetPersonsIT extends PersonBaseTest {
     @MethodSource("getListOfPersonsWithPassportNumber")
     void testGetPersonsByPassportNumberAndVerify(List<Person> expectedPersons, String passportNumber) {
         expectedPersons.forEach(person -> person.setId(postForPersonResponse(person).getId()));
-        PersonsPageResponse personsPageResponse = getForPersonResponseByPassportNumber(passportNumber);
-        verifyPersonsPageResponse(expectedPersons, personsPageResponse, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER);
+        PageResponse<Person> pageResponse = getForPersonResponseByPassportNumber(passportNumber);
+        verifyPersonsPageResponse(expectedPersons, pageResponse, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER);
     }
 
     private static Stream<Arguments> getListOfPersonsById() {
@@ -109,8 +109,8 @@ class GetPersonsIT extends PersonBaseTest {
     @MethodSource("getListOfPersonsWithInvalidPageSizeAndPageNumber")
     void testGetPersonsByInvalidPageSizeAndNumberNegative(List<Person> expectedPersons, String pageSize, String pageNumber) {
         expectedPersons.forEach(person -> person.setId(postForPersonResponse(person).getId()));
-        PersonsPageResponse personsPageResponse = getForPersonResponseByPassportNumber(pageSize, pageNumber);
-        verifyPersonsPageResponse(expectedPersons, personsPageResponse, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER);
+        PageResponse<Person> pageResponse = getForPersonResponseByPassportNumber(pageSize, pageNumber);
+        verifyPersonsPageResponse(expectedPersons, pageResponse, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUMBER);
     }
 
 }

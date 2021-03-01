@@ -7,14 +7,14 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PersonsPageResponse {
+public class PageResponse<T> {
 	private int number;
 
 	private int size;
 
 	private int totalPages;
 
-	private List<Person> content;
+	private List<T> content;
 
 	private int totalElements;
 }

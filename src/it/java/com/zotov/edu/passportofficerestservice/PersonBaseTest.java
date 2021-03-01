@@ -1,8 +1,9 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
+import com.zotov.edu.passportofficerestservice.model.PageResponse;
 import com.zotov.edu.passportofficerestservice.model.Person;
-import com.zotov.edu.passportofficerestservice.model.PersonsPageResponse;
+import io.restassured.common.mapper.TypeRef;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class PersonBaseTest extends BaseTest {
 
-    void verifyPersonsPageResponse(List<Person> expectedPersons, PersonsPageResponse personsPageResponse,
+    void verifyPersonsPageResponse(List<Person> expectedPersons, PageResponse<Person> pageResponse,
                                    int pageSize, int pageNumber) {
         int totalElements = expectedPersons.size();
         int totalPages = totalElements == 0 ? 0 : totalElements <= pageSize ? 1 : totalElements / pageSize;
@@ -23,27 +24,27 @@ public abstract class PersonBaseTest extends BaseTest {
                 .limit(pageSize)
                 .collect(Collectors.toList());
 
-        assertThat(personsPageResponse.getSize()).isEqualTo(pageSize);
-        assertThat(personsPageResponse.getTotalPages()).isEqualTo(totalPages);
-        assertThat(personsPageResponse.getTotalElements()).isEqualTo(totalElements);
-        assertThat(personsPageResponse.getNumber()).isEqualTo(pageNumber);
-        assertThat(personsPageResponse.getContent()).isEqualTo(expectedPersonsPage);
+        assertThat(pageResponse.getSize()).isEqualTo(pageSize);
+        assertThat(pageResponse.getTotalPages()).isEqualTo(totalPages);
+        assertThat(pageResponse.getTotalElements()).isEqualTo(totalElements);
+        assertThat(pageResponse.getNumber()).isEqualTo(pageNumber);
+        assertThat(pageResponse.getContent()).isEqualTo(expectedPersonsPage);
     }
 
     void verifyPersonNotFoundErrorMessages(ErrorMessage errorMessage,String entityId) {
         verifyNotFoundErrorMessages(errorMessage, entityId, "Person");
     }
 
-    PersonsPageResponse getForPersonResponse() {
+    PageResponse<Person> getForPersonResponse() {
         return when()
                 .get("/persons")
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(PersonsPageResponse.class);
+                .as(new TypeRef<>(){});
     }
 
-    PersonsPageResponse getForPersonResponseByPassportNumber(String pageSize, String pageNumber) {
+    PageResponse<Person> getForPersonResponseByPassportNumber(String pageSize, String pageNumber) {
         return given()
                 .queryParam("size", pageSize)
                 .queryParam("page", pageNumber)
@@ -52,10 +53,10 @@ public abstract class PersonBaseTest extends BaseTest {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(PersonsPageResponse.class);
+                .as(new TypeRef<>(){});
     }
 
-    PersonsPageResponse getForPersonResponseByPassportNumber(String passportNumber) {
+    PageResponse<Person> getForPersonResponseByPassportNumber(String passportNumber) {
         return given()
                 .queryParam("passportNumber", passportNumber)
                 .when()
@@ -63,7 +64,7 @@ public abstract class PersonBaseTest extends BaseTest {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(PersonsPageResponse.class);
+                .as(new TypeRef<>(){});
     }
 
     Person postForPersonResponse(Person person) {
