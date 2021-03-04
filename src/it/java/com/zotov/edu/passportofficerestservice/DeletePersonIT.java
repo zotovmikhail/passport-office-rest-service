@@ -38,7 +38,7 @@ class DeletePersonIT extends PersonBaseTest {
     @Test
     void testDeleteNonexistentPersonByPersonIdNegative() {
         String nonexistentPersonId = UUID.randomUUID().toString();
-        ErrorMessage errorMessage =deletePersonForNotFound(nonexistentPersonId);
+        ErrorMessage errorMessage = deletePersonForNotFound(nonexistentPersonId);
         verifyPersonNotFoundErrorMessages(errorMessage, nonexistentPersonId);
     }
 
