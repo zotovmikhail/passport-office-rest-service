@@ -111,9 +111,9 @@ public class PersonApiController {
 
     @PutMapping("/{personId}/passports/{passportNumber}")
     @ResponseStatus(HttpStatus.OK)
-    public PassportResponse updatePerson(@PathVariable("personId") String personId,
+    public PassportResponse updatePassport(@PathVariable("personId") String personId,
                                          @PathVariable("passportNumber") String passportNumber,
-                                         @RequestBody PassportPutRequest passportRequest) {
+                                         @Valid @RequestBody PassportPutRequest passportRequest) {
         personsService.checkIfPersonExists(personId);
         Passport updatedPassport = passportService.updatePassport(
                 passportNumber, passportRequest.getGivenDate(), passportRequest.getDepartmentCode());

@@ -8,7 +8,8 @@ import lombok.With;
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Person {
+public class PersonSpecification {
+    @With
     private String id;
 
     @With

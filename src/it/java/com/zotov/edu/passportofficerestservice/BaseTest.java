@@ -7,28 +7,40 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(ReplaceCamelCase.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseTest {
 
+    @LocalServerPort
+    int port;
+
     @BeforeEach
-    public void setUp() {
+    void setUpTestMethod() {
+        RestAssured.requestSpecification.port(port);
+    }
+
+    @BeforeAll
+    static void setUpTestClass() {
         RestAssured.requestSpecification = new RequestSpecBuilder()
                 .setAccept(ContentType.JSON)
                 .setContentType(ContentType.JSON)
                 .log(LogDetail.ALL)
                 .build();
 
-        RestAssured.responseSpecification  = new ResponseSpecBuilder()
+        RestAssured.responseSpecification = new ResponseSpecBuilder()
                 .log(LogDetail.ALL)
                 .build();
     }

@@ -4,6 +4,7 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PersonsRepository {
@@ -16,4 +17,6 @@ public interface PersonsRepository {
     boolean existsById(String id);
 
     void deleteById(String id);
+
+    void saveAll(List<Person> persons);
 }

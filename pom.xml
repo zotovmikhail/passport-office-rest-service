@@ -109,7 +109,6 @@
                 </executions>
                 <configuration>
                     <parallel>classesAndMethods</parallel>
-                    <reuseForks>false</reuseForks>
                 </configuration>
             </plugin>
         </plugins>

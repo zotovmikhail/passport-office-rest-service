@@ -65,4 +65,16 @@ public class PassportsRepositoryCollections implements PassportsRepository {
                 .collect(Collectors.toList())
                 .forEach(passport -> passports.remove(passport.getNumber()));
     }
+
+    @Override
+    public boolean existsByPassportNumber(String passportNumber) {
+        return passports.containsKey(passportNumber);
+    }
+
+    @Override
+    public void saveAll(List<Passport> passportsToAdd) {
+        Map<String, Passport> personsMap = passportsToAdd.stream()
+                .collect(Collectors.toMap(Passport::getNumber, person -> person));
+        passports.putAll(personsMap);
+    }
 }
