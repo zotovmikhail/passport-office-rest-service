@@ -8,13 +8,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePerson;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePersons;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 class PostPersonsIT extends PersonBaseTest {
 
@@ -29,11 +27,7 @@ class PostPersonsIT extends PersonBaseTest {
     void testPostPersonsAndVerify(List<PersonSpecification> expectedPersonSpecifications) {
         expectedPersonSpecifications.forEach(person -> {
             PersonSpecification personSpecificationResponse = postForPersonResponse(person);
-            try {
-                UUID.fromString(personSpecificationResponse.getId());
-            } catch (IllegalArgumentException exception) {
-                fail(exception.getMessage());
-            }
+            verifyIsUUID(personSpecificationResponse.getId());
             assertThat(personSpecificationResponse.getName()).isEqualTo(person.getName());
             assertThat(personSpecificationResponse.getBirthday()).isEqualTo(person.getBirthday());
             assertThat(personSpecificationResponse.getCountry()).isEqualTo(person.getCountry());

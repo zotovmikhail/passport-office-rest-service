@@ -202,6 +202,15 @@ public abstract class PassportsBaseTest extends PersonBaseTest {
                     .as(ErrorMessage.class);
     }
 
+    void deletePassport(String ownerId, String passportNumber) {
+        given()
+                    .pathParam("personId", ownerId)
+                    .pathParam("passportNumber", passportNumber)
+                .when()
+                    .delete("/persons/{personId}/passports/{passportNumber}")
+                .then()
+                    .statusCode(204);
+    }
 
     ErrorMessage deletePassportForNotFound(String personId, String nonexistentPassportId) {
         return given()

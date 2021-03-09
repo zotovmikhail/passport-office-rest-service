@@ -23,7 +23,7 @@ class PutPassportIT extends PassportsBaseTest {
         return Stream.of(
                 Arguments.of(generatePassportData(generatePassport())
                         .withGivenDate(generateRandomDate())
-                        .withDepartmentCode(generateRandomString()))
+                        .withDepartmentCode(generateRandomDepartmentCode()))
         );
     }
 
@@ -52,14 +52,14 @@ class PutPassportIT extends PassportsBaseTest {
         verifyNullValueErrorMessages(errorMessage, field);
     }
 
-    private Stream<Arguments> getdPassportWithEmptyValuesToUpdate() {
+    private Stream<Arguments> getPassportWithEmptyValuesToUpdate() {
         return Stream.of(
                 Arguments.of(generatePassportData(generatePassport()).withDepartmentCode(StringUtils.EMPTY), "departmentCode")
         );
     }
 
     @ParameterizedTest
-    @MethodSource("getdPassportWithEmptyValuesToUpdate")
+    @MethodSource("getPassportWithEmptyValuesToUpdate")
     void testPutPassportWithEmptyValuesNegative(PassportSpecification passportSpecification, String field) {
         ErrorMessage errorMessage = putPassportForBadRequest(passportSpecification.getOwnerId(), passportSpecification);
         verifyEmptyValueErrorMessages(errorMessage, field);

@@ -10,7 +10,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DeletePersonIT extends PersonBaseTest {
@@ -24,14 +23,7 @@ class DeletePersonIT extends PersonBaseTest {
     @ParameterizedTest
     @MethodSource("getPersonToDelete")
     void testDeletePersonAndVerify(PersonSpecification personSpecification) {
-        given()
-                    .body(personSpecification)
-                    .pathParam("personId", personSpecification.getId())
-                .when()
-                    .delete("/persons/{personId}")
-                .then()
-                    .statusCode(204);
-
+        deletePerson(personSpecification.getId());
         assertThat(personsRepository.existsById(personSpecification.getId())).isFalse();
     }
 

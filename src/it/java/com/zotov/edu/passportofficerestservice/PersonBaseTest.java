@@ -135,6 +135,15 @@ public abstract class PersonBaseTest extends BaseTest {
                     .as(ErrorMessage.class);
     }
 
+    void deletePerson(String personId) {
+        given()
+                    .pathParam("personId", personId)
+                .when()
+                    .delete("/persons/{personId}")
+                .then()
+                    .statusCode(204);
+    }
+
     ErrorMessage deletePersonForNotFound(String nonexistentPersonId) {
         return given()
                     .pathParam("personId", nonexistentPersonId)

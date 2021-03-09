@@ -6,6 +6,7 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,9 @@ import java.util.stream.Collectors;
 
 public class DataConverter {
 
-    final static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    final static DateTimeFormatter PASSPORT_SERVICE_SPECIFICATION_DATE_TIME_FORMATTER = DateTimeFormatter
+            .ofPattern("yyyy-MM-dd")
+            .withZone(ZoneId.systemDefault());
 
     public static List<Person> convertToPersonEntities(List<PersonSpecification> personSpecifications) {
         return personSpecifications.stream().map(DataConverter::convertToPersonEntity).collect(Collectors.toList());
@@ -22,7 +25,7 @@ public class DataConverter {
     public static Person convertToPersonEntity(PersonSpecification personSpecification) {
         return new Person(personSpecification.getId(),
                 personSpecification.getName(),
-                LocalDate.parse(personSpecification.getBirthday(), formatter),
+                LocalDate.parse(personSpecification.getBirthday(), PASSPORT_SERVICE_SPECIFICATION_DATE_TIME_FORMATTER),
                 personSpecification.getCountry());
     }
 

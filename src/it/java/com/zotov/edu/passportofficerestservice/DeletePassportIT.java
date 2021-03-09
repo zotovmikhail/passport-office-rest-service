@@ -11,9 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassport;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomString;
-import static io.restassured.RestAssured.given;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DeletePassportIT extends PassportsBaseTest {
@@ -27,15 +25,7 @@ class DeletePassportIT extends PassportsBaseTest {
     @ParameterizedTest
     @MethodSource("getPassportToDelete")
     void testDeletePassportAndVerify(PassportSpecification passportSpecification) {
-        given()
-                    .body(passportSpecification)
-                    .pathParam("personId", passportSpecification.getOwnerId())
-                    .pathParam("passportNumber", passportSpecification.getNumber())
-                .when()
-                    .delete("/persons/{personId}/passports/{passportNumber}")
-                .then()
-                    .statusCode(204);
-
+        deletePassport(passportSpecification.getOwnerId(), passportSpecification.getNumber());
         assertThat(passportsRepository.existsByPassportNumber(passportSpecification.getNumber())).isFalse();
     }
 
@@ -55,7 +45,7 @@ class DeletePassportIT extends PassportsBaseTest {
 
     @Test
     void testDeletePassportOfNonexistentPersonNegative() {
-        String nonexistentPersonId = UUID.randomUUID().toString();
+        String nonexistentPersonId = generateRandomPersonId();
         ErrorMessage errorMessage = deletePassportForNotFound(nonexistentPersonId, generateRandomString());
         verifyPersonNotFoundErrorMessages(errorMessage, nonexistentPersonId);
     }

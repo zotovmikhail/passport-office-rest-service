@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -70,6 +71,14 @@ abstract class BaseTest {
 
     void verifyNotFoundErrorMessages(ErrorMessage errorMessage, String entityId, String entityName) {
         assertThat(errorMessage.getMessages()).isEqualTo(List.of(String.format("%s with id '%s' is not found", entityName, entityId)));
+    }
+
+    void verifyIsUUID(String id) {
+        try {
+            UUID.fromString(id).toString();
+        } catch (IllegalArgumentException exception) {
+            fail(exception.getMessage());
+        }
     }
 
 }

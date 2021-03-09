@@ -1,26 +1,26 @@
 package com.zotov.edu.passportofficerestservice.util;
 
-import com.neovisionaries.i18n.CountryCode;
+import com.github.javafaker.Faker;
 import com.zotov.edu.passportofficerestservice.model.PageResponse;
 import com.zotov.edu.passportofficerestservice.model.PassportSpecification;
 import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
-import net.bytebuddy.utility.RandomString;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.PASSPORT_SERVICE_SPECIFICATION_DATE_TIME_FORMATTER;
 
 public class RandomDataGenerator {
 
     public static PersonSpecification generatePerson() {
         return PersonSpecification.builder()
-                .name(generateRandomString())
+                .name(generateRandomName())
                 .birthday(generateRandomDate())
-                .country(generateCountry())
+                .country(generateRandomCountry())
                 .build();
     }
 
@@ -35,7 +35,7 @@ public class RandomDataGenerator {
     public static List<PersonSpecification> generatePersonsWithIds(int numberOfPersons) {
         List<PersonSpecification> generatedPersonSpecifications = new ArrayList<>();
         for (int i = 0; i < numberOfPersons; i++) {
-            generatedPersonSpecifications.add(generatePerson().withId(UUID.randomUUID().toString()));
+            generatedPersonSpecifications.add(generatePerson().withId(generateRandomPersonId()));
         }
         return generatedPersonSpecifications;
     }
@@ -50,27 +50,39 @@ public class RandomDataGenerator {
 
     public static PassportSpecification generatePassport() {
         return PassportSpecification.builder()
-                .number(generateRandomString())
+                .number(generateRandomPassportNumber())
                 .givenDate(generateRandomDate())
-                .departmentCode(generateRandomString())
+                .departmentCode(generateRandomDepartmentCode())
                 .state(PassportState.ACTIVE)
                 .build();
     }
 
     public static String generateRandomDate() {
-        long minDay = LocalDate.of(1970, 1, 1).toEpochDay();
-        long maxDay = LocalDate.now().toEpochDay();
-        long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
-        LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
-        return randomDate.toString();
+        Instant randomDate = new Faker().date().past(30000, TimeUnit.DAYS).toInstant();
+        return PASSPORT_SERVICE_SPECIFICATION_DATE_TIME_FORMATTER.format(randomDate);
     }
 
     public static String generateRandomString() {
-        return new RandomString().nextString();
+        return new Faker().idNumber().valid();
     }
 
-    public static String generateCountry() {
-        int randomCountryIndex = new Random().nextInt(CountryCode.values().length);
-        return CountryCode.values()[randomCountryIndex].toString();
+    public static String generateRandomDepartmentCode() {
+        return new Faker().code().isbnRegistrant();
+    }
+
+    public static String generateRandomPassportNumber() {
+        return new Faker().idNumber().valid();
+    }
+
+    public static String generateRandomName() {
+        return new Faker().name().fullName();
+    }
+
+    public static String generateRandomCountry() {
+        return new Faker().country().countryCode2();
+    }
+
+    public static String generateRandomPersonId() {
+        return UUID.randomUUID().toString();
     }
 }
