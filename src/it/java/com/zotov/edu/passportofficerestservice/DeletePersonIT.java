@@ -1,37 +1,39 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
+import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.deletePerson;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.deletePersonForNotFound;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePerson;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DeletePersonIT extends PersonBaseTest {
+class DeletePersonIT extends BaseTest {
 
-    private Stream<Arguments> getPersonToDelete() {
-        return Stream.of(
-                Arguments.of(generatePersonData())
-        );
-    }
+    @Autowired
+    private PersonsRepository personsRepository;
 
-    @ParameterizedTest
-    @MethodSource("getPersonToDelete")
-    void testDeletePersonAndVerify(PersonSpecification personSpecification) {
-        deletePerson(personSpecification.getId());
-        assertThat(personsRepository.existsById(personSpecification.getId())).isFalse();
+    @Test
+    void testDeletePersonAndVerify() {
+        Person person = personsRepository.save(generatePerson());
+
+        deletePerson(person.getId());
+
+        assertThat(personsRepository.existsById(person.getId())).isFalse();
     }
 
     @Test
     void testDeleteNonexistentPersonByPersonIdNegative() {
         String nonexistentPersonId = UUID.randomUUID().toString();
+
         ErrorMessage errorMessage = deletePersonForNotFound(nonexistentPersonId);
-        verifyPersonNotFoundErrorMessages(errorMessage, nonexistentPersonId);
+
+        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }
 
 }

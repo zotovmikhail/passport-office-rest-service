@@ -1,38 +1,42 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
+import com.zotov.edu.passportofficerestservice.model.PersonResponse;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPersonResponse;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonNotFound;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponseById;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class GetPersonIT extends PersonBaseTest {
+class GetPersonIT extends BaseTest {
 
-    private Stream<Arguments> getListOfPersonsById() {
-        return Stream.of(
-                Arguments.of(generatePersonData())
-        );
-    }
+    @Autowired
+    private PersonDataHandler personDataHandler;
 
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsById")
-    void testGetPersonsByPersonIdAndVerify(PersonSpecification expectedPersonSpecification) {
-        PersonSpecification personSpecificationResponse = getForPersonResponseById(expectedPersonSpecification.getId());
-        assertThat(personSpecificationResponse).isEqualTo(expectedPersonSpecification);
+    @Test
+    void testGetPersonsByPersonIdAndVerify() {
+        Person person = personDataHandler.generatePersonData();
+        PersonResponse expectedPersonResponse = convertToPersonResponse(person);
+
+        PersonResponse personResponse = getForPersonResponseById(person.getId());
+
+        assertThat(personResponse).isEqualTo(expectedPersonResponse);
     }
 
     @Test
     void testGetNonexistentPersonsByPersonIdNegative() {
         String nonexistentPersonId = UUID.randomUUID().toString();
+
         ErrorMessage errorMessage = getForPersonNotFound(nonexistentPersonId);
-        verifyPersonNotFoundErrorMessages(errorMessage, nonexistentPersonId);
+
+        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }
 
 }

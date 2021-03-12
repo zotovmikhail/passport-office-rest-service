@@ -1,73 +1,82 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.PageResponse;
-import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
+import com.zotov.edu.passportofficerestservice.model.PersonResponse;
+import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
+import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.stream.Stream;
 
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPersonResponse;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponse;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponseByPassportNumber;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetPersonsIT extends PersonBaseTest {
+@Slf4j
+class GetPersonsIT extends BaseTest {
 
-    private Stream<Arguments> getListOfPersons() {
+    @Autowired
+    private PersonDataHandler personDataHandler;
+
+    @Autowired
+    private PassportDataHandler passportDataHandler;
+
+    private static Stream<Arguments> getListOfPersons() {
         return Stream.of(
-                Arguments.of(generatePersonsPageData(100, 100, 0))
+                Arguments.of(null, null, 100, 0, "Default page size and page number"),
+                Arguments.of("100", "0", 100, 0, "Valid page size and page number"),
+                Arguments.of("50", "4", 50, 4, "Page other than the first one"),
+                Arguments.of("invalidPageSize", "invalidPageNumber", 100, 0, "Invalid page size and page number"),
+                Arguments.of("100000000000000", "10000000000000000", 100, 0, "Too big page size and page number"),
+                Arguments.of("-1", "-1", 100, 0, "Negative page size and page number"),
+                Arguments.of("0", "0", 100, 0, "Zero page size and page number")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getListOfPersons")
-    void testGetPersonsAndVerifyDefaultValues(PageResponse<PersonSpecification> expectedPersonsPage) {
-        PageResponse<PersonSpecification> pageResponse = getForPersonResponse();
-        verifyPersonsPageSizeAndNumber(expectedPersonsPage, pageResponse);
-        assertThat(pageResponse.getContent().size()).isEqualTo(expectedPersonsPage.getSize());
+    void testGetPersonsAndVerifyDefaultValues(String pageSize, String pageNumber, int expectedPageSize, int expectedPageNumber, String description) {
+        log.info(description);
+        personDataHandler.generatePersonsData(200);
+
+        PageResponse<PersonResponse> pageResponse = getForPersonResponse(pageSize, pageNumber);
+
+        assertThat(pageResponse.getSize()).isEqualTo(expectedPageSize);
+        assertThat(pageResponse.getNumber()).isEqualTo(expectedPageNumber);
+        assertThat(pageResponse.getContent().size()).isEqualTo(expectedPageSize);
     }
 
-    private Stream<Arguments> getListOfPersonsWithPageSizeAndPageNumber() {
-        return Stream.of(
-                Arguments.of(generatePersonsPageData(250, 50, 4))
-        );
+    @Test
+    void testGetPersonsByNonexistentPassportNumber() {
+        PageResponse<PersonResponse> pageResponse = getForPersonResponseByPassportNumber("NonexistentPassportNumber");
+
+        assertThat(pageResponse.getSize()).isEqualTo(100);
+        assertThat(pageResponse.getNumber()).isZero();
+        assertThat(pageResponse.getContent().size()).isZero();
+        assertThat(pageResponse.getContent()).isEqualTo(List.of());
     }
 
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsWithPageSizeAndPageNumber")
-    void testGetPersonsAndVerify(PageResponse<PersonSpecification> expectedPersonsPage) {
-        PageResponse<PersonSpecification> pageResponse = getForPersonResponseByPassportNumber(
-                String.valueOf(expectedPersonsPage.getSize()),
-                String.valueOf(expectedPersonsPage.getNumber()));
-        verifyPersonsPageSizeAndNumber(expectedPersonsPage, pageResponse);
-        assertThat(pageResponse.getContent().size()).isEqualTo(expectedPersonsPage.getSize());
-    }
+    @Test
+    void testGetPersonsByPassportNumber() {
+        Person person = personDataHandler.generatePersonData();
+        PersonResponse expectedPersonResponse = convertToPersonResponse(person);
+        Passport passport = passportDataHandler.generatePassportData(person.getId());
 
-    private Stream<Arguments> getListOfPersonsWithPassportNumber() {
-        return Stream.of(
-                Arguments.of(generatePersonsPageData(0, 100, 0), "NonexistentPassport")
-        );
-    }
+        PageResponse<PersonResponse> pageResponse = getForPersonResponseByPassportNumber(passport.getNumber());
 
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsWithPassportNumber")
-    void testGetPersonsByPassportNumberAndVerify(PageResponse<PersonSpecification> expectedPersonsPage, String passportNumber) {
-        PageResponse<PersonSpecification> pageResponse = getForPersonResponseByPassportNumber(passportNumber);
-        verifyPersonsPageSizeAndNumber(expectedPersonsPage, pageResponse);
-        assertThat(pageResponse.getContent()).isEmpty();
-    }
-
-    private Stream<Arguments> getListOfPersonsWithInvalidPageSizeAndPageNumber() {
-        return Stream.of(
-                Arguments.of(generatePersonsPageData(0, 100, 0), "invalidPageSize", "invalidPageNumber"),
-                Arguments.of(generatePersonsPageData(0, 100, 0), "100000000000000000", "100000000000000000")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsWithInvalidPageSizeAndPageNumber")
-    void testGetPersonsByInvalidPageSizeAndNumberNegative(PageResponse<PersonSpecification> expectedPersonsPage, String pageSize, String pageNumber) {
-        PageResponse<PersonSpecification> pageResponse = getForPersonResponseByPassportNumber(pageSize, pageNumber);
-        verifyPersonsPageSizeAndNumber(expectedPersonsPage, pageResponse);
+        assertThat(pageResponse.getSize()).isEqualTo(100);
+        assertThat(pageResponse.getNumber()).isZero();
+        assertThat(pageResponse.getContent().size()).isEqualTo(1);
+        assertThat(pageResponse.getContent()).isEqualTo(List.of(expectedPersonResponse));
     }
 
 }

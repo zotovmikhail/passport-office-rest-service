@@ -1,74 +1,75 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PassportSpecification;
-import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
+import com.zotov.edu.passportofficerestservice.model.PassportResponse;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
+import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassport;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomString;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportResponse;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-class LosePassportIT extends PassportsBaseTest {
-    private Stream<Arguments> getPassportToLose() {
-        return Stream.of(
-                Arguments.of(generatePassportData(generatePassport()))
-        );
-    }
+class LosePassportIT extends BaseTest {
 
-    @ParameterizedTest
-    @MethodSource("getPassportToLose")
-    void testLosePassportAndVerify(PassportSpecification passportSpecification) {
-        PassportSpecification lostPassportSpecification =
-                losePassportForPassportResponse(passportSpecification.getOwnerId(), passportSpecification.getNumber());
-        assertThat(lostPassportSpecification).isEqualTo(passportSpecification);
-        Passport foundPassport = passportsRepository
-                .findByPassportNumber(passportSpecification.getNumber())
-                .orElseGet(() -> fail(String.format("Passport '%s' is not found in the data.", passportSpecification.getNumber())));
+    @Autowired
+    private PersonDataHandler personDataHandler;
+
+    @Autowired
+    private PassportDataHandler passportDataHandler;
+
+    @Test
+    void testLosePassportAndVerify() {
+        Person person = personDataHandler.generatePersonData();
+        Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()));
+        PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
+
+        PassportResponse lostPassportSpecification =
+                losePassportForPassportResponse(passport.getOwnerId(), passport.getNumber());
+
+        assertThat(lostPassportSpecification).isEqualTo(expectedPassportResponse);
+
+        Passport foundPassport = passportDataHandler.getPassportsRepository()
+                .findByPassportNumber(passport.getNumber())
+                .orElseGet(() -> fail(String.format("Passport '%s' is not found in the data.", passport.getNumber())));
+
         assertThat(foundPassport.getState()).isEqualTo(PassportState.LOST);
     }
 
-    private Stream<Arguments> getLostPassport() {
-        return Stream.of(
-                Arguments.of(generatePassportData(generatePassport().withState(PassportState.LOST)))
-        );
+    @Test
+    void testLoseAlreadyLostPassportNegative() {
+        Person person = personDataHandler.generatePersonData();
+        Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(PassportState.LOST));
+
+        ErrorMessage errorMessage = losePassportForConflict(passport.getOwnerId(), passport.getNumber());
+
+        verifyErrorMessages(errorMessage, List.of(String.format("Passport with number '%s' is already lost.", passport.getNumber())));
     }
 
-    @ParameterizedTest
-    @MethodSource("getLostPassport")
-    void testLoseAlreadyLostPassportNegative(PassportSpecification passportSpecification) {
-        ErrorMessage errorMessage = losePassportForConflict(passportSpecification.getOwnerId(), passportSpecification.getNumber());
-        verifyErrorMessages(errorMessage, List.of(String.format("Passport with number '%s' is already lost.", passportSpecification.getNumber())));
-    }
+    @Test
+    void testLoseNonexistentPassportByPassportIdNegative() {
+        String nonexistentPassportNumber = generateRandomPassportNumber();
+        Person person = personDataHandler.generatePersonData();
 
-    private Stream<Arguments> getListOfPersons() {
-        return Stream.of(
-                Arguments.of(generatePersonData())
-        );
-    }
+        ErrorMessage errorMessage = losePassportForNotFound(person.getId(), nonexistentPassportNumber);
 
-    @ParameterizedTest
-    @MethodSource("getListOfPersons")
-    void testLoseNonexistentPassportByPassportIdNegative(PersonSpecification personSpecification) {
-        String nonexistentPassportId = UUID.randomUUID().toString();
-        ErrorMessage errorMessage = losePassportForNotFound(personSpecification.getId(), nonexistentPassportId);
-        verifyPassportNotFoundErrorMessages(errorMessage, nonexistentPassportId);
+        verifyNotFoundErrorMessages(errorMessage, nonexistentPassportNumber, "Passport");
     }
 
     @Test
     void testLosePassportOfNonexistentPersonNegative() {
-        String nonexistentPersonId = UUID.randomUUID().toString();
+        String nonexistentPersonId = generateRandomPersonId();
+
         ErrorMessage errorMessage = losePassportForNotFound(nonexistentPersonId, generateRandomString());
-        verifyPersonNotFoundErrorMessages(errorMessage, nonexistentPersonId);
+
+        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }
 }

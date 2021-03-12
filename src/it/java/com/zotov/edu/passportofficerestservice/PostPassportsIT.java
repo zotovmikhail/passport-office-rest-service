@@ -1,95 +1,125 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PassportSpecification;
-import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
+import com.zotov.edu.passportofficerestservice.model.PassportRequest;
+import com.zotov.edu.passportofficerestservice.model.PassportResponse;
+import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
+import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
+import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassport;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportRequest;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassportRequest;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomPersonId;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-class PostPassportsIT extends PassportsBaseTest {
+@Slf4j
+class PostPassportsIT extends BaseTest {
 
-    private Stream<Arguments> getListOfPassportsToCreate() {
-        return Stream.of(
-                Arguments.of(generatePersonData(), generatePassport())
-        );
+    @Autowired
+    private PersonDataHandler personDataHandler;
+
+    @Autowired
+    private PassportDataHandler passportDataHandler;
+
+    @Test
+    void testPostPassportAndVerify() {
+        Person person = personDataHandler.generatePersonData();
+        PassportRequest passportRequest = generatePassportRequest();
+
+        PassportResponse passportResponse = postForPassportResponse(person.getId(), passportRequest);
+
+        assertThat(passportResponse.getNumber()).isEqualTo(passportRequest.getNumber());
+        assertThat(passportResponse.getDepartmentCode()).isEqualTo(passportRequest.getDepartmentCode());
+        assertThat(passportResponse.getGivenDate()).isEqualTo(passportRequest.getGivenDate());
+
+        Passport passportFromDB = passportDataHandler.getPassportsRepository()
+                .findByPassportNumber(passportRequest.getNumber())
+                .orElseGet(() -> fail(String.format("Passport '%s' is not found in the database", passportRequest.getNumber())));
+
+        assertThat(passportFromDB.getOwnerId()).isEqualTo(person.getId());
+        assertThat(passportFromDB.getNumber()).isEqualTo(passportRequest.getNumber());
+        assertThat(passportFromDB.getDepartmentCode()).isEqualTo(passportRequest.getDepartmentCode());
+        assertThat(passportFromDB.getGivenDate()).isEqualTo(passportRequest.getGivenDate());
+        assertThat(passportFromDB.getState()).isEqualTo(PassportState.ACTIVE);
     }
 
-    @ParameterizedTest
-    @MethodSource("getListOfPassportsToCreate")
-    void testPostPassportAndVerify(PersonSpecification personSpecification, PassportSpecification expectedPassportSpecification) {
-        PassportSpecification createdPassportSpecification = postForPassportResponse(personSpecification.getId(), expectedPassportSpecification);
-        assertThat(createdPassportSpecification).isEqualTo(expectedPassportSpecification);
-    }
-
-    private Stream<Arguments> getPersonAndPassportWithNullValues() {
+    private static Stream<Arguments> getPersonAndPassportWithNullValues() {
         return Stream.of(
-                Arguments.of(generatePersonData(), generatePassport().withGivenDate(null), "givenDate"),
-                Arguments.of(generatePersonData(), generatePassport().withGivenDate(StringUtils.EMPTY), "givenDate")
+                Arguments.of(generatePassportRequest().withGivenDate(null), "givenDate", "Null given date value"),
+                Arguments.of(generatePassportRequest().withGivenDate(StringUtils.EMPTY), "givenDate", "Empty given date value")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getPersonAndPassportWithNullValues")
-    void testPostPassportWithNullValuesNegative(PersonSpecification personSpecification, PassportSpecification passportSpecification, String field) {
-        ErrorMessage errorMessage = postPassportForBadRequest(personSpecification.getId(), passportSpecification);
+    void testPostPassportWithNullValuesNegative(PassportRequest passportRequest, String field, String description) {
+        log.info(description);
+        Person person = personDataHandler.generatePersonData();
+
+        ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequest);
+
         verifyNullValueErrorMessages(errorMessage, field);
     }
 
-    private Stream<Arguments> getPersonAndPassportWithEmptyValues() {
+    private static Stream<Arguments> getPersonAndPassportWithEmptyValues() {
         return Stream.of(
-                Arguments.of(generatePersonData(), generatePassport().withNumber(StringUtils.EMPTY), "number"),
-                Arguments.of(generatePersonData(), generatePassport().withDepartmentCode(StringUtils.EMPTY), "departmentCode")
+                Arguments.of(generatePassportRequest().withNumber(StringUtils.EMPTY), "number", "Empty passport number value"),
+                Arguments.of(generatePassportRequest().withDepartmentCode(StringUtils.EMPTY), "departmentCode", "Empty department code value")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getPersonAndPassportWithEmptyValues")
-    void testPostPassportWithEmptyValuesNegative(PersonSpecification personSpecification, PassportSpecification passportSpecification, String field) {
-        ErrorMessage errorMessage = postPassportForBadRequest(personSpecification.getId(), passportSpecification);
+    void testPostPassportWithEmptyValuesNegative(PassportRequest passportRequest, String field, String description) {
+        log.info(description);
+        Person person = personDataHandler.generatePersonData();
+
+        ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequest);
+
         verifyEmptyValueErrorMessages(errorMessage, field);
     }
 
-    private Stream<Arguments> getPersonAndPassportWithInvalidGivenDate() {
-        return Stream.of(
-                Arguments.of(generatePersonData(), generatePassport().withGivenDate("1993-06-072"))
-        );
-    }
+    @Test
+    void testPostPassportWithInvalidGivenDateNegative() {
+        Person person = personDataHandler.generatePersonData();
+        PassportRequest passportRequestWithInvalidGivenDate = generatePassportRequest().withGivenDate("1993-06-072");
 
-    @ParameterizedTest
-    @MethodSource("getPersonAndPassportWithInvalidGivenDate")
-    void testPostPassportWithInvalidGivenDateNegative(PersonSpecification personSpecification, PassportSpecification passportSpecification) {
-        ErrorMessage errorMessage = postPassportForBadRequest(personSpecification.getId(), passportSpecification);
-        verifyInvalidDateErrorMessages(errorMessage, passportSpecification.getGivenDate());
+        ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequestWithInvalidGivenDate);
+
+        verifyInvalidDateErrorMessages(errorMessage, passportRequestWithInvalidGivenDate.getGivenDate());
     }
 
     @Test
-    void testPostPassportOfNonexistentPersonBNegative() {
-        String nonExistentPersonId = UUID.randomUUID().toString();
-        ErrorMessage errorMessage = postForNotFoundByPassportNumber(nonExistentPersonId, generatePassport());
-        verifyPersonNotFoundErrorMessages(errorMessage, nonExistentPersonId);
+    void testPostPassportOfNonexistentPersonNegative() {
+        String nonExistentPersonId = generateRandomPersonId();
+
+        ErrorMessage errorMessage = postForNotFoundByPassportNumber(nonExistentPersonId, generatePassportRequest());
+
+        verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
     }
 
-    private Stream<Arguments> getPassportAndPerson() {
-        return Stream.of(
-                Arguments.of(generatePassportData(generatePassport()))
-        );
-    }
+    @Test
+    void testPostAlreadyExistsPassportNegative() {
+        Person person = personDataHandler.generatePersonData();
+        Passport passport = passportDataHandler.generatePassportData(person.getId());
 
-    @ParameterizedTest
-    @MethodSource("getPassportAndPerson")
-    void testPostAlreadyExistsPassportNegative(PassportSpecification passportSpecification) {
-            ErrorMessage errorMessage = postForConflictPassport(passportSpecification.getOwnerId(), passportSpecification);
-            verifyErrorMessages(errorMessage, List.of(String.format("Passport with id '%s' already exists in the data", passportSpecification.getNumber())));
+        ErrorMessage errorMessage = postForConflictPassport(person.getId(), convertToPassportRequest(passport));
+
+        verifyErrorMessages(errorMessage, List.of(String.format("Passport with id '%s' already exists in the data", passport.getNumber())));
     }
 
 }

@@ -1,16 +1,12 @@
 package com.zotov.edu.passportofficerestservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Builder;
 import lombok.Data;
-import lombok.With;
 
 import java.util.List;
 
 @Data
-@Builder
-@With
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties
 public class PageResponse<T> {
 	private int number;
 

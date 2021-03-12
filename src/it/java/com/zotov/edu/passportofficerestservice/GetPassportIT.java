@@ -1,58 +1,58 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PassportSpecification;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import com.zotov.edu.passportofficerestservice.model.PassportResponse;
+import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
+import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
+import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassport;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomString;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportResponse;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.getForNotFoundByPassportNumber;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.getForPassportResponseByPassportNumber;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GetPassportIT extends PassportsBaseTest {
+class GetPassportIT extends BaseTest {
 
-    private Stream<Arguments> getPassport() {
-        return Stream.of(
-                Arguments.of(generatePassportData(generatePassport()))
-        );
+    @Autowired
+    private PersonDataHandler personDataHandler;
+
+    @Autowired
+    private PassportDataHandler passportDataHandler;
+
+    @Test
+    void testGetPassportByPassportId() {
+        Person person = personDataHandler.generatePersonData();
+        Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(PassportState.ACTIVE));
+        PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
+
+        PassportResponse passportSpecificationResponse =
+                getForPassportResponseByPassportNumber(passport.getOwnerId(), passport.getNumber());
+
+        assertThat(passportSpecificationResponse).isEqualTo(expectedPassportResponse);
     }
 
-    @ParameterizedTest
-    @MethodSource("getPassport")
-    void testGetPassportByPassportId(PassportSpecification expectedPassportSpecification) {
-            PassportSpecification passportSpecificationResponse =
-                    getForPassportResponseByPassportNumber(expectedPassportSpecification.getOwnerId(), expectedPassportSpecification.getNumber());
-            assertThat(passportSpecificationResponse).isEqualTo(expectedPassportSpecification);
+    @Test
+    void testGetNonexistentPassportByPassportIdNegative() {
+        String nonExistentPassportNumber = generateRandomPassportNumber();
+        Person person = personDataHandler.generatePersonData();
+
+        ErrorMessage errorMessage = getForNotFoundByPassportNumber(person.getId(), nonExistentPassportNumber);
+
+        verifyNotFoundErrorMessages(errorMessage, nonExistentPassportNumber, "Passport");
     }
 
-    private Stream<Arguments> getPersonIdAndNonexistentPassport() {
-        return Stream.of(
-                Arguments.of(generatePersonData().getId(), generateRandomString())
-        );
-    }
+    @Test
+    void testGetPassportOfNonexistentPersonByPassportIdNegative() {
+        String nonExistentPersonId = generateRandomPersonId();
 
-    @ParameterizedTest
-    @MethodSource("getPersonIdAndNonexistentPassport")
-    void testGetNonexistentPassportByPassportIdNegative(String createdPersonId, String nonExistentPassportNumber) {
-        ErrorMessage errorMessage = getForNotFoundByPassportNumber(createdPersonId, nonExistentPassportNumber);
-        verifyPassportNotFoundErrorMessages(errorMessage, nonExistentPassportNumber);
-    }
+        ErrorMessage errorMessage = getForNotFoundByPassportNumber(nonExistentPersonId, generateRandomPassportNumber());
 
-    private static Stream<Arguments> getNonExistentPersonAndNonexistentPassport() {
-        return Stream.of(
-                Arguments.of(generateRandomString(), UUID.randomUUID().toString())
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getNonExistentPersonAndNonexistentPassport")
-    void testGetPassportOfNonexistentPersonByPassportIdNegative(String nonExistentPassportNumber, String nonExistentPersonId) {
-        ErrorMessage errorMessage = getForNotFoundByPassportNumber(nonExistentPersonId, nonExistentPassportNumber);
-        verifyPersonNotFoundErrorMessages(errorMessage, nonExistentPersonId);
+        verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
     }
 
 }

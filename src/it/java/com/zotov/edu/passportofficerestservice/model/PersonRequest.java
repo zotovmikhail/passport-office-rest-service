@@ -1,17 +1,12 @@
 package com.zotov.edu.passportofficerestservice.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.Data;
 import lombok.With;
 
 @Data
 @Builder
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class PersonSpecification {
-    @With
-    private String id;
-
+public class PersonRequest {
     @With
     private String name;
 

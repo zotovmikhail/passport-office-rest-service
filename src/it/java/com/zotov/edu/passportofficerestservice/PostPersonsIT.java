@@ -1,92 +1,110 @@
 package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PersonSpecification;
+import com.zotov.edu.passportofficerestservice.model.PersonRequest;
+import com.zotov.edu.passportofficerestservice.model.PersonResponse;
+import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
+import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePerson;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePersons;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.postForPersonResponse;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.postPersonForBadRequest;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePersonRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
-class PostPersonsIT extends PersonBaseTest {
+@Slf4j
+class PostPersonsIT extends BaseTest {
 
-    private static Stream<Arguments> getListOfPersonsToCreate() {
-        return Stream.of(
-                Arguments.of(generatePersons(1))
-        );
-    }
+    @Autowired
+    private PersonsRepository personsRepository;
 
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsToCreate")
-    void testPostPersonsAndVerify(List<PersonSpecification> expectedPersonSpecifications) {
-        expectedPersonSpecifications.forEach(person -> {
-            PersonSpecification personSpecificationResponse = postForPersonResponse(person);
-            verifyIsUUID(personSpecificationResponse.getId());
-            assertThat(personSpecificationResponse.getName()).isEqualTo(person.getName());
-            assertThat(personSpecificationResponse.getBirthday()).isEqualTo(person.getBirthday());
-            assertThat(personSpecificationResponse.getCountry()).isEqualTo(person.getCountry());
-        });
+    @Test
+    void testPostPersonAndVerify() {
+        PersonRequest personRequest = generatePersonRequest();
+
+        PersonResponse personResponse = postForPersonResponse(personRequest);
+
+        verifyIsUUID(personResponse.getId());
+        assertThat(personResponse.getName()).isEqualTo(personRequest.getName());
+        assertThat(personResponse.getBirthday()).isEqualTo(personRequest.getBirthday());
+        assertThat(personResponse.getCountry()).isEqualTo(personRequest.getCountry());
+
+        Person personFromDB = personsRepository
+                .findById(personResponse.getId())
+                .orElseGet(() -> fail(String.format("Person '%s' is not found in the database", personResponse.getId())));
+
+        assertThat(personFromDB.getName()).isEqualTo(personRequest.getName());
+        assertThat(personFromDB.getBirthday()).isEqualTo(personRequest.getBirthday());
+        assertThat(personFromDB.getCountry()).isEqualTo(personRequest.getCountry());
     }
 
     private static Stream<Arguments> getListOfPersonsWithNullValues() {
         return Stream.of(
-                Arguments.of(generatePerson().withBirthday(null), "birthday"),
-                Arguments.of(generatePerson().withBirthday(StringUtils.EMPTY), "birthday"),
-                Arguments.of(generatePerson().withCountry(null), "country")
+                Arguments.of(generatePersonRequest().withBirthday(null), "birthday", "Null birthday value"),
+                Arguments.of(generatePersonRequest().withBirthday(StringUtils.EMPTY), "birthday", "Empty birthday value"),
+                Arguments.of(generatePersonRequest().withCountry(null), "country", "Null country value")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithNullValues")
-    void testPostPersonsWithNullValuesNegative(PersonSpecification personSpecification, String field) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personSpecification);
-        verifyNullValueErrorMessages(errorMessage, field);
+    void testPostPersonsWithNullValuesNegative(PersonRequest personRequest, String fieldName, String description) {
+        log.info(description);
+
+        ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
+
+        verifyNullValueErrorMessages(errorMessage, fieldName);
     }
 
     private static Stream<Arguments> getListOfPersonsWithEmptyValues() {
         return Stream.of(
-                Arguments.of(generatePerson().withName(null), "name"),
-                Arguments.of(generatePerson().withName(StringUtils.EMPTY), "name")
+                Arguments.of(generatePersonRequest().withName(null), "name", "Null name value"),
+                Arguments.of(generatePersonRequest().withName(StringUtils.EMPTY), "name", "Empty name value")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithEmptyValues")
-    void testPostPersonsWithEmptyValuesNegative(PersonSpecification personSpecification, String field) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personSpecification);
+    void testPostPersonsWithEmptyValuesNegative(PersonRequest personRequest, String field, String description) {
+        log.info(description);
+
+        ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
+
         verifyEmptyValueErrorMessages(errorMessage, field);
     }
 
-    private static Stream<Arguments> getListOfPersonsWithInvalidBirthday() {
-        return Stream.of(
-                Arguments.of(generatePerson().withBirthday("1993-06-072"))
-        );
-    }
+    @Test
+    void testPostPersonsWithInvalidBirthdayNegative() {
+        String invalidBirthday = "1993-06-072";
 
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsWithInvalidBirthday")
-    void testPostPersonsWithInvalidBirthdayNegative(PersonSpecification personSpecification) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personSpecification);
-        verifyInvalidDateErrorMessages(errorMessage, personSpecification.getBirthday());
+        ErrorMessage errorMessage = postPersonForBadRequest(generatePersonRequest().withBirthday(invalidBirthday));
+
+        verifyInvalidDateErrorMessages(errorMessage, invalidBirthday);
     }
 
     private static Stream<Arguments> getListOfPersonsWithInvalidCountry() {
         return Stream.of(
-                Arguments.of(generatePerson().withCountry("Invalid")),
-                Arguments.of(generatePerson().withCountry(StringUtils.EMPTY))
+                Arguments.of(generatePersonRequest().withCountry("Invalid"), "Invalid country value"),
+                Arguments.of(generatePersonRequest().withCountry(StringUtils.EMPTY), "Empty country value")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithInvalidCountry")
-    void testPostPersonsWithInvalidCountryNegative(PersonSpecification personSpecification) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personSpecification);
+    void testPostPersonsWithInvalidCountryNegative(PersonRequest personRequest, String description) {
+        log.info(description);
+
+        ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
+
         verifyInvalidCountryErrorMessages(errorMessage);
     }
 
