@@ -4,6 +4,7 @@ import com.zotov.edu.passportofficerestservice.controller.converter.PassportCont
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportPutRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PersonRequest;
+import com.zotov.edu.passportofficerestservice.controller.dto.response.PageResponse;
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PassportResponse;
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
@@ -12,7 +13,6 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.service.PassportService;
 import com.zotov.edu.passportofficerestservice.service.PersonService;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,13 +37,13 @@ public class PersonApiController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<PersonResponse> getPersons(@RequestParam(required = false, name = "passportNumber")
+    public PageResponse<PersonResponse> getPersons(@RequestParam(required = false, name = "passportNumber")
                                                    Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
-        return passportNumber
+        return new PageResponse<>(passportNumber
                 .map(existentPassportNumber -> personsService.getPersonByPassportNumber(existentPassportNumber, pageable))
                 .orElseGet(() -> personsService.getAllPersons(pageable))
-                .map(passportControllerDtoConverter::convertPersonToDto);
+                .map(passportControllerDtoConverter::convertPersonToDto));
     }
 
     @PostMapping()
