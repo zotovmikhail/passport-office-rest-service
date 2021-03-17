@@ -8,10 +8,9 @@ import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.zotov.edu.passportofficerestservice.util.PassportRequests.deletePassport;
-import static com.zotov.edu.passportofficerestservice.util.PassportRequests.deletePassportForNotFound;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class DeletePassportIT extends BaseTest {
 
@@ -26,7 +25,8 @@ class DeletePassportIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportsRepository.save((generatePassport(person.getId())));
 
-        deletePassport(passport.getOwnerId(), passport.getNumber());
+        deletePassport(passport.getOwnerId(), passport.getNumber())
+                .statusCode(204);
 
         assertThat(passportsRepository.existsByPassportNumber(passport.getNumber())).isFalse();
     }
@@ -36,7 +36,11 @@ class DeletePassportIT extends BaseTest {
         String nonexistentPassportId = generateRandomPassportNumber();
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorMessage = deletePassportForNotFound(person.getId(), nonexistentPassportId);
+        ErrorMessage errorMessage =
+                deletePassport(person.getId(), nonexistentPassportId)
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonexistentPassportId, "Passport");
     }
@@ -45,7 +49,11 @@ class DeletePassportIT extends BaseTest {
     void testDeletePassportOfNonexistentPersonNegative() {
         String nonexistentPersonId = generateRandomPersonId();
 
-        ErrorMessage errorMessage = deletePassportForNotFound(nonexistentPersonId, generateRandomString());
+        ErrorMessage errorMessage =
+                deletePassport(nonexistentPersonId, generateRandomString())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }

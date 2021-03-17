@@ -10,11 +10,10 @@ import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportResponse;
-import static com.zotov.edu.passportofficerestservice.util.PassportRequests.getForNotFoundByPassportNumber;
-import static com.zotov.edu.passportofficerestservice.util.PassportRequests.getForPassportResponseByPassportNumber;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 class GetPassportIT extends BaseTest {
 
@@ -30,10 +29,13 @@ class GetPassportIT extends BaseTest {
         Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(PassportState.ACTIVE));
         PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
 
-        PassportResponse passportSpecificationResponse =
-                getForPassportResponseByPassportNumber(passport.getOwnerId(), passport.getNumber());
+        PassportResponse passportResponse =
+                getPassport(passport.getOwnerId(), passport.getNumber())
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse.class);
 
-        assertThat(passportSpecificationResponse).isEqualTo(expectedPassportResponse);
+        assertThat(passportResponse).isEqualTo(expectedPassportResponse);
     }
 
     @Test
@@ -41,7 +43,11 @@ class GetPassportIT extends BaseTest {
         String nonExistentPassportNumber = generateRandomPassportNumber();
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorMessage = getForNotFoundByPassportNumber(person.getId(), nonExistentPassportNumber);
+        ErrorMessage errorMessage =
+                getPassport(person.getId(), nonExistentPassportNumber)
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonExistentPassportNumber, "Passport");
     }
@@ -50,7 +56,11 @@ class GetPassportIT extends BaseTest {
     void testGetPassportOfNonexistentPersonByPassportIdNegative() {
         String nonExistentPersonId = generateRandomPersonId();
 
-        ErrorMessage errorMessage = getForNotFoundByPassportNumber(nonExistentPersonId, generateRandomPassportNumber());
+        ErrorMessage errorMessage =
+                getPassport(nonExistentPersonId, generateRandomPassportNumber())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
     }

@@ -8,6 +8,7 @@ import com.zotov.edu.passportofficerestservice.model.PersonRequest;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import lombok.experimental.UtilityClass;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -19,9 +20,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@UtilityClass
 public class RandomDataGenerator {
 
-    public static PersonRequest generatePersonRequest() {
+    public PersonRequest generatePersonRequest() {
         return PersonRequest.builder()
                 .name(generateRandomName())
                 .birthday(generateRandomDate())
@@ -29,7 +31,7 @@ public class RandomDataGenerator {
                 .build();
     }
 
-    public static PersonPutRequest generatePersonPutRequest() {
+    public PersonPutRequest generatePersonPutRequest() {
         return PersonPutRequest.builder()
                 .name(generateRandomName())
                 .birthday(generateRandomDate())
@@ -37,7 +39,7 @@ public class RandomDataGenerator {
                 .build();
     }
 
-    public static Person generatePerson() {
+    public Person generatePerson() {
         return new Person(
                 generateRandomPersonId(),
                 generateRandomName(),
@@ -46,7 +48,7 @@ public class RandomDataGenerator {
         );
     }
 
-    public static List<Person> generatePersons(int numberOfPersons) {
+    public List<Person> generatePersons(int numberOfPersons) {
         List<Person> generatedPersonSpecifications = new ArrayList<>();
         for (int i = 0; i < numberOfPersons; i++) {
             generatedPersonSpecifications.add(generatePerson());
@@ -54,7 +56,7 @@ public class RandomDataGenerator {
         return generatedPersonSpecifications;
     }
 
-    public static PassportRequest generatePassportRequest() {
+    public PassportRequest generatePassportRequest() {
         return PassportRequest.builder()
                 .number(generateRandomPassportNumber())
                 .givenDate(generateRandomDate())
@@ -62,7 +64,7 @@ public class RandomDataGenerator {
                 .build();
     }
 
-    public static PassportResponse generatePassportResponse() {
+    public PassportResponse generatePassportResponse() {
         return PassportResponse.builder()
                 .number(generateRandomPassportNumber())
                 .givenDate(generateRandomDate())
@@ -70,7 +72,7 @@ public class RandomDataGenerator {
                 .build();
     }
 
-    public static Passport generatePassport(String ownerId) {
+    public Passport generatePassport(String ownerId) {
         return new Passport(generateRandomPassportNumber(),
                 LocalDate.parse(generateRandomDate(), DateTimeFormatter.ISO_LOCAL_DATE),
                 generateRandomDepartmentCode(),
@@ -78,32 +80,32 @@ public class RandomDataGenerator {
                 ownerId);
     }
 
-    public static String generateRandomDate() {
+    public String generateRandomDate() {
         Instant randomDate = Faker.instance().date().past(30000, TimeUnit.DAYS).toInstant();
         return LocalDateTime.ofInstant(randomDate, ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
-    public static String generateRandomString() {
+    public String generateRandomString() {
         return Faker.instance().idNumber().valid();
     }
 
-    public static String generateRandomDepartmentCode() {
+    public String generateRandomDepartmentCode() {
         return Faker.instance().code().isbnRegistrant();
     }
 
-    public static String generateRandomPassportNumber() {
+    public String generateRandomPassportNumber() {
         return Faker.instance().idNumber().valid();
     }
 
-    public static String generateRandomName() {
+    public String generateRandomName() {
         return Faker.instance().name().fullName();
     }
 
-    public static String generateRandomCountry() {
+    public String generateRandomCountry() {
         return Faker.instance().country().countryCode2();
     }
 
-    public static String generateRandomPersonId() {
+    public String generateRandomPersonId() {
         return UUID.randomUUID().toString();
     }
 }

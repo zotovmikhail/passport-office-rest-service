@@ -5,8 +5,7 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePerson;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePersons;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 
 @Component
 public class PersonDataHandler {

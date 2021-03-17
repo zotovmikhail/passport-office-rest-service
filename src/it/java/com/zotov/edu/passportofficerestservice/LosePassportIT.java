@@ -12,11 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportResponse;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
 
 class LosePassportIT extends BaseTest {
 
@@ -33,7 +32,10 @@ class LosePassportIT extends BaseTest {
         PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
 
         PassportResponse lostPassportSpecification =
-                losePassportForPassportResponse(passport.getOwnerId(), passport.getNumber());
+                losePassport(passport.getOwnerId(), passport.getNumber())
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse.class);
 
         assertThat(lostPassportSpecification).isEqualTo(expectedPassportResponse);
 
@@ -49,7 +51,11 @@ class LosePassportIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(PassportState.LOST));
 
-        ErrorMessage errorMessage = losePassportForConflict(passport.getOwnerId(), passport.getNumber());
+        ErrorMessage errorMessage =
+                losePassport(passport.getOwnerId(), passport.getNumber())
+                        .statusCode(409)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyErrorMessages(errorMessage, List.of(String.format("Passport with number '%s' is already lost.", passport.getNumber())));
     }
@@ -59,7 +65,11 @@ class LosePassportIT extends BaseTest {
         String nonexistentPassportNumber = generateRandomPassportNumber();
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorMessage = losePassportForNotFound(person.getId(), nonexistentPassportNumber);
+        ErrorMessage errorMessage =
+                losePassport(person.getId(), nonexistentPassportNumber)
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonexistentPassportNumber, "Passport");
     }
@@ -68,7 +78,11 @@ class LosePassportIT extends BaseTest {
     void testLosePassportOfNonexistentPersonNegative() {
         String nonexistentPersonId = generateRandomPersonId();
 
-        ErrorMessage errorMessage = losePassportForNotFound(nonexistentPersonId, generateRandomString());
+        ErrorMessage errorMessage =
+                losePassport(nonexistentPersonId, generateRandomString())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }

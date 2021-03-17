@@ -17,12 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.generatePassportPutRequest;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomPassportNumber;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomPersonId;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
+import static org.assertj.core.api.Assertions.*;
 
 class PutPassportIT extends BaseTest {
 
@@ -38,7 +36,11 @@ class PutPassportIT extends BaseTest {
         Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
         PassportPutRequest passportRequestToUpdate = generatePassportPutRequest();
 
-        PassportResponse passportResponse = putForPassportResponse(person.getId(), initialPassport.getNumber(), passportRequestToUpdate);
+        PassportResponse passportResponse =
+                putPassport(person.getId(), initialPassport.getNumber(), passportRequestToUpdate)
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse.class);
         assertThat(passportResponse.getNumber()).isEqualTo(initialPassport.getNumber());
         assertThat(passportResponse.getGivenDate()).isEqualTo(passportRequestToUpdate.getGivenDate());
         assertThat(passportResponse.getDepartmentCode()).isEqualTo(passportRequestToUpdate.getDepartmentCode());
@@ -67,7 +69,11 @@ class PutPassportIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
 
-        ErrorMessage errorMessage = putPassportForBadRequest(person.getId(), initialPassport.getNumber(), passportRequest);
+        ErrorMessage errorMessage =
+                putPassport(person.getId(), initialPassport.getNumber(), passportRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNullValueErrorMessages(errorMessage, field);
     }
@@ -84,7 +90,11 @@ class PutPassportIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
 
-        ErrorMessage errorMessage = putPassportForBadRequest(person.getId(), initialPassport.getNumber(), passportRequest);
+        ErrorMessage errorMessage =
+                putPassport(person.getId(), initialPassport.getNumber(), passportRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyEmptyValueErrorMessages(errorMessage, field);
     }
@@ -95,7 +105,12 @@ class PutPassportIT extends BaseTest {
         Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
         PassportPutRequest passportPutRequest = generatePassportPutRequest().withGivenDate("1993-06-072");
 
-        ErrorMessage errorMessage = putPassportForBadRequest(person.getId(), initialPassport.getNumber(), passportPutRequest);
+        ErrorMessage errorMessage =
+                putPassport(person.getId(), initialPassport.getNumber(), passportPutRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
+
         verifyInvalidDateErrorMessages(errorMessage, passportPutRequest.getGivenDate());
     }
 
@@ -103,7 +118,11 @@ class PutPassportIT extends BaseTest {
     void testPutPassportOfNonexistentPersonNegative() {
         String nonExistentPersonId = generateRandomPersonId();
 
-        ErrorMessage errorMessage = putForNotFoundByPassportNumber(nonExistentPersonId, generateRandomPassportNumber(), generatePassportPutRequest());
+        ErrorMessage errorMessage =
+                putPassport(nonExistentPersonId, generateRandomPassportNumber(), generatePassportPutRequest())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
     }
@@ -113,7 +132,11 @@ class PutPassportIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         String nonExistentPassportNumber = generateRandomPassportNumber();
 
-        ErrorMessage errorMessage = putForNotFoundByPassportNumber(person.getId(), nonExistentPassportNumber, generatePassportPutRequest());
+        ErrorMessage errorMessage =
+                putPassport(person.getId(), nonExistentPassportNumber, generatePassportPutRequest())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonExistentPassportNumber, "Passport");
     }

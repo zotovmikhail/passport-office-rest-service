@@ -12,14 +12,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPersonPutRequest;
 import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePersonPutRequest;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
+import static org.assertj.core.api.Assertions.*;
 
 class PutPersonIT extends BaseTest {
 
@@ -29,20 +26,24 @@ class PutPersonIT extends BaseTest {
     @Test
     void testPutPersonAndVerify() {
         Person person = personDataHandler.generatePersonData();
-        PersonPutRequest personRequest = convertToPersonPutRequest(person);
+        PersonPutRequest personRequest = generatePersonPutRequest();
 
-        PersonResponse updatedPersonResponse = putForPersonResponse(personRequest);
+        PersonResponse updatedPersonResponse =
+                putPerson(person.getId(), personRequest)
+                        .statusCode(200)
+                        .extract()
+                        .as(PersonResponse.class);
 
-        assertThat(updatedPersonResponse.getId()).isEqualTo(personRequest.getId());
+        assertThat(updatedPersonResponse.getId()).isEqualTo(person.getId());
         assertThat(updatedPersonResponse.getName()).isEqualTo(personRequest.getName());
         assertThat(updatedPersonResponse.getBirthday()).isEqualTo(personRequest.getBirthday());
         assertThat(updatedPersonResponse.getCountry()).isEqualTo(personRequest.getCountry());
 
         Person personFromDB = personDataHandler.getPersonsRepository()
-                .findById(personRequest.getId())
-                .orElseGet(() -> fail(String.format("Person '%s' is not found in the data.", personRequest.getId())));
+                .findById(person.getId())
+                .orElseGet(() -> fail(String.format("Person '%s' is not found in the data.", person.getId())));
 
-        assertThat(personFromDB.getId()).isEqualTo(personRequest.getId());
+        assertThat(personFromDB.getId()).isEqualTo(person.getId());
         assertThat(personFromDB.getName()).isEqualTo(personRequest.getName());
         assertThat(personFromDB.getBirthday()).isEqualTo(personRequest.getBirthday());
         assertThat(personFromDB.getCountry()).isEqualTo(personRequest.getCountry());
@@ -60,7 +61,11 @@ class PutPersonIT extends BaseTest {
     void testPutPersonWithNullValuesNegative(PersonPutRequest personPutRequest, String field, String description) {
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorResponse = putPersonForBadRequest(personPutRequest.withId(person.getId()));
+        ErrorMessage errorResponse =
+                putPerson(person.getId(), personPutRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNullValueErrorMessages(errorResponse, field);
     }
@@ -77,7 +82,11 @@ class PutPersonIT extends BaseTest {
     void testPutPersonWithEmptyValuesNegative(PersonPutRequest personPutRequest, String field, String description) {
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorResponse = putPersonForBadRequest(personPutRequest.withId(person.getId()));
+        ErrorMessage errorResponse =
+                putPerson(person.getId(), personPutRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyEmptyValueErrorMessages(errorResponse, field);
     }
@@ -87,9 +96,11 @@ class PutPersonIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         String invalidBirthdayValue = "1993-06-072";
 
-        ErrorMessage errorMessage = putPersonForBadRequest(generatePersonPutRequest()
-                .withId(person.getId())
-                .withBirthday(invalidBirthdayValue));
+        ErrorMessage errorMessage =
+                putPerson(person.getId(), generatePersonPutRequest().withBirthday(invalidBirthdayValue))
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyInvalidDateErrorMessages(errorMessage, invalidBirthdayValue);
     }
@@ -106,16 +117,24 @@ class PutPersonIT extends BaseTest {
     void testPutPersonsWithInvalidCountryNegative(PersonPutRequest personPutRequest, String description) {
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorMessage = putPersonForBadRequest(personPutRequest.withId(person.getId()));
+        ErrorMessage errorMessage =
+                putPerson(person.getId(), personPutRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyInvalidCountryErrorMessages(errorMessage);
     }
 
     @Test
     void testPutNonexistentPersonsByPersonIdNegative() {
-        String nonexistentPersonId = UUID.randomUUID().toString();
+        String nonexistentPersonId = generateRandomPersonId();
 
-        ErrorMessage errorMessage = putForPersonNotFound(nonexistentPersonId);
+        ErrorMessage errorMessage =
+                putPerson(nonexistentPersonId, generatePersonPutRequest())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }

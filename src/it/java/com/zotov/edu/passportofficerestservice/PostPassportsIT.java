@@ -18,12 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportRequest;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassportRequest;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generateRandomPersonId;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
+import static org.assertj.core.api.Assertions.*;
 
 class PostPassportsIT extends BaseTest {
 
@@ -38,7 +36,11 @@ class PostPassportsIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         PassportRequest passportRequest = generatePassportRequest();
 
-        PassportResponse passportResponse = postForPassportResponse(person.getId(), passportRequest);
+        PassportResponse passportResponse =
+                postPassport(person.getId(), passportRequest)
+                        .statusCode(201)
+                        .extract()
+                        .as(PassportResponse.class);
 
         assertThat(passportResponse.getNumber()).isEqualTo(passportRequest.getNumber());
         assertThat(passportResponse.getDepartmentCode()).isEqualTo(passportRequest.getDepartmentCode());
@@ -67,7 +69,11 @@ class PostPassportsIT extends BaseTest {
     void testPostPassportWithNullValuesNegative(PassportRequest passportRequest, String field, String description) {
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequest);
+        ErrorMessage errorMessage =
+                postPassport(person.getId(), passportRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNullValueErrorMessages(errorMessage, field);
     }
@@ -84,7 +90,11 @@ class PostPassportsIT extends BaseTest {
     void testPostPassportWithEmptyValuesNegative(PassportRequest passportRequest, String field, String description) {
         Person person = personDataHandler.generatePersonData();
 
-        ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequest);
+        ErrorMessage errorMessage =
+                postPassport(person.getId(), passportRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyEmptyValueErrorMessages(errorMessage, field);
     }
@@ -94,7 +104,11 @@ class PostPassportsIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         PassportRequest passportRequestWithInvalidGivenDate = generatePassportRequest().withGivenDate("1993-06-072");
 
-        ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequestWithInvalidGivenDate);
+        ErrorMessage errorMessage =
+                postPassport(person.getId(), passportRequestWithInvalidGivenDate)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyInvalidDateErrorMessages(errorMessage, passportRequestWithInvalidGivenDate.getGivenDate());
     }
@@ -103,7 +117,11 @@ class PostPassportsIT extends BaseTest {
     void testPostPassportOfNonexistentPersonNegative() {
         String nonExistentPersonId = generateRandomPersonId();
 
-        ErrorMessage errorMessage = postForNotFoundByPassportNumber(nonExistentPersonId, generatePassportRequest());
+        ErrorMessage errorMessage =
+                postPassport(nonExistentPersonId, generatePassportRequest())
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
     }
@@ -113,7 +131,11 @@ class PostPassportsIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(person.getId());
 
-        ErrorMessage errorMessage = postForConflictPassport(person.getId(), convertToPassportRequest(passport));
+        ErrorMessage errorMessage =
+                postPassport(person.getId(), convertToPassportRequest(passport))
+                        .statusCode(409)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyErrorMessages(errorMessage, List.of(String.format("Passport with id '%s' already exists in the data", passport.getNumber())));
     }

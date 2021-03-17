@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.PersonRequests.postForPersonResponse;
-import static com.zotov.edu.passportofficerestservice.util.PersonRequests.postPersonForBadRequest;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePersonRequest;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
+import static org.assertj.core.api.Assertions.*;
 
 class PostPersonsIT extends BaseTest {
 
@@ -29,7 +27,11 @@ class PostPersonsIT extends BaseTest {
     void testPostPersonAndVerify() {
         PersonRequest personRequest = generatePersonRequest();
 
-        PersonResponse personResponse = postForPersonResponse(personRequest);
+        PersonResponse personResponse =
+                postPerson(personRequest)
+                        .statusCode(201)
+                        .extract()
+                        .as(PersonResponse.class);
 
         verifyIsUUID(personResponse.getId());
         assertThat(personResponse.getName()).isEqualTo(personRequest.getName());
@@ -56,7 +58,11 @@ class PostPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithNullValues")
     void testPostPersonsWithNullValuesNegative(PersonRequest personRequest, String fieldName, String description) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
+        ErrorMessage errorMessage =
+                postPerson(personRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNullValueErrorMessages(errorMessage, fieldName);
     }
@@ -71,7 +77,11 @@ class PostPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithEmptyValues")
     void testPostPersonsWithEmptyValuesNegative(PersonRequest personRequest, String field, String description) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
+        ErrorMessage errorMessage =
+                postPerson(personRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyEmptyValueErrorMessages(errorMessage, field);
     }
@@ -80,7 +90,11 @@ class PostPersonsIT extends BaseTest {
     void testPostPersonsWithInvalidBirthdayNegative() {
         String invalidBirthday = "1993-06-072";
 
-        ErrorMessage errorMessage = postPersonForBadRequest(generatePersonRequest().withBirthday(invalidBirthday));
+        ErrorMessage errorMessage =
+                postPerson(generatePersonRequest().withBirthday(invalidBirthday))
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyInvalidDateErrorMessages(errorMessage, invalidBirthday);
     }
@@ -95,7 +109,11 @@ class PostPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithInvalidCountry")
     void testPostPersonsWithInvalidCountryNegative(PersonRequest personRequest, String description) {
-        ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
+        ErrorMessage errorMessage =
+                postPerson(personRequest)
+                        .statusCode(400)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyInvalidCountryErrorMessages(errorMessage);
     }

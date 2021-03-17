@@ -14,13 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportEntity;
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPassportResponse;
-import static com.zotov.edu.passportofficerestservice.util.PassportRequests.getForPassportResponseByMaxAndMinGivenDates;
-import static com.zotov.edu.passportofficerestservice.util.PassportRequests.getForPassportResponseByPassportState;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassport;
-import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassportResponse;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
+import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
+import static org.assertj.core.api.Assertions.*;
 
 class GetPassportsIT extends BaseTest {
 
@@ -45,7 +42,11 @@ class GetPassportsIT extends BaseTest {
         Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(passportState));
         PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
 
-        Set<PassportResponse> passportsResponse = getForPassportResponseByPassportState(person.getId(), passportStateQueryParam);
+        Set<PassportResponse> passportsResponse = Set.of(
+                getPassports(person.getId(), passportStateQueryParam)
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse[].class));
 
         assertThat(passportsResponse).isEqualTo(Set.of(expectedPassportResponse));
     }
@@ -63,7 +64,12 @@ class GetPassportsIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(passportState));
 
-        Set<PassportResponse> passportsResponse = getForPassportResponseByPassportState(person.getId(), passportStateQueryParam);
+        Set<PassportResponse> passportsResponse = Set.of(
+                getPassports(person.getId(), passportStateQueryParam)
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse[].class));
+
         assertThat(passportsResponse).isEqualTo(Set.of());
     }
 
@@ -84,8 +90,12 @@ class GetPassportsIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(convertToPassportEntity(expectedPassportResponse, PassportState.ACTIVE, person.getId()));
 
-        Set<PassportResponse> passportsResponse =
-                getForPassportResponseByMaxAndMinGivenDates(passport.getOwnerId(), minGivenDateParam, maxGivenDateParam);
+        Set<PassportResponse> passportsResponse = Set.of(
+                getPassports(passport.getOwnerId(), minGivenDateParam, maxGivenDateParam)
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse[].class));
+
         assertThat(passportsResponse).isEqualTo(Set.of(expectedPassportResponse));
     }
 
@@ -104,8 +114,12 @@ class GetPassportsIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(convertToPassportEntity(expectedPassportResponse, PassportState.ACTIVE, person.getId()));
 
-        Set<PassportResponse> passportsResponse =
-                getForPassportResponseByMaxAndMinGivenDates(passport.getOwnerId(), minGivenDateParam, maxGivenDateParam);
+        Set<PassportResponse> passportsResponse = Set.of(
+                getPassports(passport.getOwnerId(), minGivenDateParam, maxGivenDateParam)
+                        .statusCode(200)
+                        .extract()
+                        .as(PassportResponse[].class));
+
         assertThat(passportsResponse).isEqualTo(Set.of());
     }
 

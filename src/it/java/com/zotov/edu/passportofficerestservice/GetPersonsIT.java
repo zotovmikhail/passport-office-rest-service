@@ -6,6 +6,7 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,10 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPersonResponse;
-import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponse;
-import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponseByPassportNumber;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
+import static org.assertj.core.api.Assertions.*;
 
 class GetPersonsIT extends BaseTest {
 
@@ -45,7 +45,12 @@ class GetPersonsIT extends BaseTest {
     void testGetPersonsAndVerifyDefaultValues(String pageSize, String pageNumber, int expectedPageSize, int expectedPageNumber, String description) {
         personDataHandler.generatePersonsData(200);
 
-        PageResponse<PersonResponse> pageResponse = getForPersonResponse(pageSize, pageNumber);
+        PageResponse<PersonResponse> pageResponse =
+                getPersons(pageSize, pageNumber)
+                        .statusCode(200)
+                        .extract()
+                        .as(new TypeRef<>() {
+                        });
 
         assertThat(pageResponse.getSize()).isEqualTo(expectedPageSize);
         assertThat(pageResponse.getNumber()).isEqualTo(expectedPageNumber);
@@ -54,7 +59,12 @@ class GetPersonsIT extends BaseTest {
 
     @Test
     void testGetPersonsByNonexistentPassportNumber() {
-        PageResponse<PersonResponse> pageResponse = getForPersonResponseByPassportNumber("NonexistentPassportNumber");
+        PageResponse<PersonResponse> pageResponse =
+                getPersons("NonexistentPassportNumber")
+                        .statusCode(200)
+                        .extract()
+                        .as(new TypeRef<>() {
+                        });
 
         assertThat(pageResponse.getSize()).isEqualTo(100);
         assertThat(pageResponse.getNumber()).isZero();
@@ -68,7 +78,12 @@ class GetPersonsIT extends BaseTest {
         PersonResponse expectedPersonResponse = convertToPersonResponse(person);
         Passport passport = passportDataHandler.generatePassportData(person.getId());
 
-        PageResponse<PersonResponse> pageResponse = getForPersonResponseByPassportNumber(passport.getNumber());
+        PageResponse<PersonResponse> pageResponse =
+                getPersons(passport.getNumber())
+                        .statusCode(200)
+                        .extract()
+                        .as(new TypeRef<>() {
+                        });
 
         assertThat(pageResponse.getSize()).isEqualTo(100);
         assertThat(pageResponse.getNumber()).isZero();

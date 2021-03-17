@@ -9,10 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
-import static com.zotov.edu.passportofficerestservice.util.DataConverter.convertToPersonResponse;
-import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonNotFound;
-import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponseById;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
+import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
+import static org.assertj.core.api.Assertions.*;
 
 
 class GetPersonIT extends BaseTest {
@@ -25,7 +24,11 @@ class GetPersonIT extends BaseTest {
         Person person = personDataHandler.generatePersonData();
         PersonResponse expectedPersonResponse = convertToPersonResponse(person);
 
-        PersonResponse personResponse = getForPersonResponseById(person.getId());
+        PersonResponse personResponse =
+                getPerson(person.getId())
+                        .statusCode(200)
+                        .extract()
+                        .as(PersonResponse.class);
 
         assertThat(personResponse).isEqualTo(expectedPersonResponse);
     }
@@ -34,7 +37,11 @@ class GetPersonIT extends BaseTest {
     void testGetNonexistentPersonsByPersonIdNegative() {
         String nonexistentPersonId = UUID.randomUUID().toString();
 
-        ErrorMessage errorMessage = getForPersonNotFound(nonexistentPersonId);
+        ErrorMessage errorMessage =
+                getPerson(nonexistentPersonId)
+                        .statusCode(404)
+                        .extract()
+                        .as(ErrorMessage.class);
 
         verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
     }
