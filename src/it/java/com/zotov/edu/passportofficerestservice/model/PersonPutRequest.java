@@ -8,9 +8,6 @@ import lombok.With;
 @Builder
 public class PersonPutRequest {
     @With
-    private String id;
-
-    @With
     private String name;
 
     @With

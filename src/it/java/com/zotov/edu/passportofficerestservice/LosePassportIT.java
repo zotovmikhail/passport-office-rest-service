@@ -2,6 +2,7 @@ package com.zotov.edu.passportofficerestservice;
 
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
 import com.zotov.edu.passportofficerestservice.model.PassportResponse;
+import com.zotov.edu.passportofficerestservice.repository.PassportsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
@@ -25,6 +26,9 @@ class LosePassportIT extends BaseTest {
     @Autowired
     private PassportDataHandler passportDataHandler;
 
+    @Autowired
+    private PassportsRepository passportsRepository;
+
     @Test
     void testLosePassportAndVerify() {
         Person person = personDataHandler.generatePersonData();
@@ -39,7 +43,7 @@ class LosePassportIT extends BaseTest {
 
         assertThat(lostPassportSpecification).isEqualTo(expectedPassportResponse);
 
-        Passport foundPassport = passportDataHandler.getPassportsRepository()
+        Passport foundPassport = passportsRepository
                 .findByPassportNumber(passport.getNumber())
                 .orElseGet(() -> fail(String.format("Passport '%s' is not found in the data.", passport.getNumber())));
 

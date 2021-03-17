@@ -15,10 +15,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @UtilityClass
 public class RandomDataGenerator {
@@ -49,11 +50,10 @@ public class RandomDataGenerator {
     }
 
     public List<Person> generatePersons(int numberOfPersons) {
-        List<Person> generatedPersonSpecifications = new ArrayList<>();
-        for (int i = 0; i < numberOfPersons; i++) {
-            generatedPersonSpecifications.add(generatePerson());
-        }
-        return generatedPersonSpecifications;
+        return Stream
+                .generate(RandomDataGenerator::generatePerson)
+                .limit(numberOfPersons)
+                .collect(Collectors.toList());
     }
 
     public PassportRequest generatePassportRequest() {

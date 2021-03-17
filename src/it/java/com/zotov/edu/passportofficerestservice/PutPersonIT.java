@@ -3,6 +3,7 @@ package com.zotov.edu.passportofficerestservice;
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
 import com.zotov.edu.passportofficerestservice.model.PersonPutRequest;
 import com.zotov.edu.passportofficerestservice.model.PersonResponse;
+import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,9 @@ class PutPersonIT extends BaseTest {
     @Autowired
     private PersonDataHandler personDataHandler;
 
+    @Autowired
+    private PersonsRepository personsRepository;
+
     @Test
     void testPutPersonAndVerify() {
         Person person = personDataHandler.generatePersonData();
@@ -39,7 +43,7 @@ class PutPersonIT extends BaseTest {
         assertThat(updatedPersonResponse.getBirthday()).isEqualTo(personRequest.getBirthday());
         assertThat(updatedPersonResponse.getCountry()).isEqualTo(personRequest.getCountry());
 
-        Person personFromDB = personDataHandler.getPersonsRepository()
+        Person personFromDB = personsRepository
                 .findById(person.getId())
                 .orElseGet(() -> fail(String.format("Person '%s' is not found in the data.", person.getId())));
 

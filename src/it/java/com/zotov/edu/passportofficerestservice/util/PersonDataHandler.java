@@ -2,20 +2,16 @@ package com.zotov.edu.passportofficerestservice.util;
 
 import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 
 @Component
+@AllArgsConstructor
 public class PersonDataHandler {
 
-    @Getter
     private final PersonsRepository personsRepository;
-
-    public PersonDataHandler(PersonsRepository personsRepository) {
-        this.personsRepository = personsRepository;
-    }
 
     public void generatePersonsData(int numberOfPersons) {
         personsRepository.saveAll(generatePersons(numberOfPersons));
