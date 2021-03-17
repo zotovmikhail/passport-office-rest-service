@@ -6,7 +6,6 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,7 +20,6 @@ import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getFor
 import static com.zotov.edu.passportofficerestservice.util.PersonRequests.getForPersonResponseByPassportNumber;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 class GetPersonsIT extends BaseTest {
 
     @Autowired
@@ -45,7 +43,6 @@ class GetPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersons")
     void testGetPersonsAndVerifyDefaultValues(String pageSize, String pageNumber, int expectedPageSize, int expectedPageNumber, String description) {
-        log.info(description);
         personDataHandler.generatePersonsData(200);
 
         PageResponse<PersonResponse> pageResponse = getForPersonResponse(pageSize, pageNumber);

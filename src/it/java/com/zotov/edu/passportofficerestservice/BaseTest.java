@@ -1,5 +1,6 @@
 package com.zotov.edu.passportofficerestservice;
 
+import com.zotov.edu.passportofficerestservice.extension.TestExecutionLoggerExtension;
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
 import com.zotov.edu.passportofficerestservice.util.ReplaceCamelCase;
 import io.restassured.RestAssured;
@@ -10,6 +11,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
@@ -21,6 +23,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(ReplaceCamelCase.class)
+@ExtendWith(TestExecutionLoggerExtension.class)
 abstract class BaseTest {
 
     @LocalServerPort
@@ -73,7 +76,7 @@ abstract class BaseTest {
 
     void verifyIsUUID(String id) {
         try {
-            UUID.fromString(id).toString();
+            UUID.fromString(id);
         } catch (IllegalArgumentException exception) {
             fail(exception.getMessage());
         }

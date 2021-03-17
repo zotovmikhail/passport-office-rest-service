@@ -6,7 +6,6 @@ import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,7 +22,6 @@ import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.g
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.generatePassportResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 class GetPassportsIT extends BaseTest {
 
     @Autowired
@@ -43,7 +41,6 @@ class GetPassportsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPassportsAndOwnerId")
     void testGetPassportsByPassportStateAndVerify(PassportState passportState, String passportStateQueryParam, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(passportState));
         PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
@@ -63,7 +60,6 @@ class GetPassportsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPassportsWithStateToVerifyEmptyResponse")
     void testGetLostPassportsByPassportStateAndVerifyEmptyResponse(PassportState passportState, String passportStateQueryParam, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
         passportDataHandler.generatePassportData(generatePassport(person.getId()).withState(passportState));
 
@@ -85,7 +81,6 @@ class GetPassportsIT extends BaseTest {
     @MethodSource("getListOfPassportsForMaxAndMinGivenDate")
     void testGetPassportsByMinAndMaxGivenDate(PassportResponse expectedPassportResponse, String minGivenDateParam,
                                               String maxGivenDateParam, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(convertToPassportEntity(expectedPassportResponse, PassportState.ACTIVE, person.getId()));
 
@@ -106,7 +101,6 @@ class GetPassportsIT extends BaseTest {
     @MethodSource("getListOfPassportsForMaxAndMinGivenDateEmpty")
     void testGetPassportsByMinAndMaxGivenDateAndVerifyEmpty(PassportResponse expectedPassportResponse, String minGivenDateParam,
                                                             String maxGivenDateParam, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(convertToPassportEntity(expectedPassportResponse, PassportState.ACTIVE, person.getId()));
 

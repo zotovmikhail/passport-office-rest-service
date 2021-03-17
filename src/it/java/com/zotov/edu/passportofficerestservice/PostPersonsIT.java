@@ -5,7 +5,6 @@ import com.zotov.edu.passportofficerestservice.model.PersonRequest;
 import com.zotov.edu.passportofficerestservice.model.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +20,6 @@ import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.g
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-@Slf4j
 class PostPersonsIT extends BaseTest {
 
     @Autowired
@@ -58,8 +56,6 @@ class PostPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithNullValues")
     void testPostPersonsWithNullValuesNegative(PersonRequest personRequest, String fieldName, String description) {
-        log.info(description);
-
         ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
 
         verifyNullValueErrorMessages(errorMessage, fieldName);
@@ -75,8 +71,6 @@ class PostPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithEmptyValues")
     void testPostPersonsWithEmptyValuesNegative(PersonRequest personRequest, String field, String description) {
-        log.info(description);
-
         ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
 
         verifyEmptyValueErrorMessages(errorMessage, field);
@@ -101,8 +95,6 @@ class PostPersonsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getListOfPersonsWithInvalidCountry")
     void testPostPersonsWithInvalidCountryNegative(PersonRequest personRequest, String description) {
-        log.info(description);
-
         ErrorMessage errorMessage = postPersonForBadRequest(personRequest);
 
         verifyInvalidCountryErrorMessages(errorMessage);

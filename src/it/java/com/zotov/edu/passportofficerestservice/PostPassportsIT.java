@@ -8,7 +8,6 @@ import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,7 +25,6 @@ import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.g
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-@Slf4j
 class PostPassportsIT extends BaseTest {
 
     @Autowired
@@ -67,7 +65,6 @@ class PostPassportsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getPersonAndPassportWithNullValues")
     void testPostPassportWithNullValuesNegative(PassportRequest passportRequest, String field, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequest);
@@ -85,7 +82,6 @@ class PostPassportsIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getPersonAndPassportWithEmptyValues")
     void testPostPassportWithEmptyValuesNegative(PassportRequest passportRequest, String field, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorMessage = postPassportForBadRequest(person.getId(), passportRequest);

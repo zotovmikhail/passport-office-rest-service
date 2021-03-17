@@ -5,7 +5,6 @@ import com.zotov.edu.passportofficerestservice.model.PersonPutRequest;
 import com.zotov.edu.passportofficerestservice.model.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,7 +21,6 @@ import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.g
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-@Slf4j
 class PutPersonIT extends BaseTest {
 
     @Autowired
@@ -60,7 +58,6 @@ class PutPersonIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getPersonWithNullValuesToUpdate")
     void testPutPersonWithNullValuesNegative(PersonPutRequest personPutRequest, String field, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorResponse = putPersonForBadRequest(personPutRequest.withId(person.getId()));
@@ -78,7 +75,6 @@ class PutPersonIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getPersonForUpdateWithEmptyValuesToUpdate")
     void testPutPersonWithEmptyValuesNegative(PersonPutRequest personPutRequest, String field, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorResponse = putPersonForBadRequest(personPutRequest.withId(person.getId()));
@@ -108,7 +104,6 @@ class PutPersonIT extends BaseTest {
     @ParameterizedTest
     @MethodSource("getPersonWithInvalidCountryToUpdate")
     void testPutPersonsWithInvalidCountryNegative(PersonPutRequest personPutRequest, String description) {
-        log.info(description);
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorMessage = putPersonForBadRequest(personPutRequest.withId(person.getId()));
