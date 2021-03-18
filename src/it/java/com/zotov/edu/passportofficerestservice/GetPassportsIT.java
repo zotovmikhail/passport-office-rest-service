@@ -99,7 +99,7 @@ class GetPassportsIT extends BaseTest {
         assertThat(passportsResponse).isEqualTo(Set.of(expectedPassportResponse));
     }
 
-    private static Stream<Arguments> getListOfPassportsForMaxAndMinGivenDateEmpty() {
+    private static Stream<Arguments> getListOfPassportsForMaxAndMinGivenDateEmptyResponse() {
         return Stream.of(
                 Arguments.of(generatePassportResponse().withGivenDate("2021-01-01"), "2021-01-02", null, "Less than min given date"),
                 Arguments.of(generatePassportResponse().withGivenDate("2021-01-01"), "2021-01-02", "2021-01-02", "Less than min given date, max is not empty"),
@@ -108,8 +108,8 @@ class GetPassportsIT extends BaseTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getListOfPassportsForMaxAndMinGivenDateEmpty")
-    void testGetPassportsByMinAndMaxGivenDateAndVerifyEmpty(PassportResponse expectedPassportResponse, String minGivenDateParam,
+    @MethodSource("getListOfPassportsForMaxAndMinGivenDateEmptyResponse")
+    void testGetPassportsByMinAndMaxGivenDateAndVerifyEmptyResponse(PassportResponse expectedPassportResponse, String minGivenDateParam,
                                                             String maxGivenDateParam, String description) {
         Person person = personDataHandler.generatePersonData();
         Passport passport = passportDataHandler.generatePassportData(convertToPassportEntity(expectedPassportResponse, PassportState.ACTIVE, person.getId()));

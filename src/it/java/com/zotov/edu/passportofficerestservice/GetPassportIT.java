@@ -49,7 +49,7 @@ class GetPassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonExistentPassportNumber, "Passport");
+        verifyErrorMessages(errorMessage, String.format("Passport with id '%s' is not found", nonExistentPassportNumber));
     }
 
     @Test
@@ -62,7 +62,7 @@ class GetPassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonExistentPersonId));
     }
 
 }

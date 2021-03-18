@@ -47,75 +47,29 @@ class PostPersonsIT extends BaseTest {
         assertThat(personFromDB.getCountry()).isEqualTo(personRequest.getCountry());
     }
 
-    private static Stream<Arguments> getListOfPersonsWithNullValues() {
+    private static Stream<Arguments> getListOfPersonsWithInvalidValues() {
         return Stream.of(
-                Arguments.of(generatePersonRequest().withBirthday(null), "birthday", "Null birthday value"),
-                Arguments.of(generatePersonRequest().withBirthday(StringUtils.EMPTY), "birthday", "Empty birthday value"),
-                Arguments.of(generatePersonRequest().withCountry(null), "country", "Null country value")
+                Arguments.of(generatePersonRequest().withBirthday(null), "birthday must not be null"),
+                Arguments.of(generatePersonRequest().withBirthday(StringUtils.EMPTY), "birthday must not be null"),
+                Arguments.of(generatePersonRequest().withCountry(null),  "country must not be null"),
+                Arguments.of(generatePersonRequest().withName(null), "name must not be empty"),
+                Arguments.of(generatePersonRequest().withName(StringUtils.EMPTY), "name must not be empty"),
+                Arguments.of(generatePersonRequest().withBirthday("1993-06-072"), "Text '1993-06-072' could not be parsed, unparsed text found at index 10"),
+                Arguments.of(generatePersonRequest().withCountry("Invalid"), "country is not found in the list of available countries."),
+                Arguments.of(generatePersonRequest().withCountry(StringUtils.EMPTY), "country is not found in the list of available countries.")
         );
     }
 
     @ParameterizedTest
-    @MethodSource("getListOfPersonsWithNullValues")
-    void testPostPersonsWithNullValuesNegative(PersonRequest personRequest, String fieldName, String description) {
+    @MethodSource("getListOfPersonsWithInvalidValues")
+    void testPostPersonsNegative(PersonRequest personRequest, String expectedErrorMessage) {
         ErrorMessage errorMessage =
                 postPerson(personRequest)
                         .statusCode(400)
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNullValueErrorMessages(errorMessage, fieldName);
-    }
-
-    private static Stream<Arguments> getListOfPersonsWithEmptyValues() {
-        return Stream.of(
-                Arguments.of(generatePersonRequest().withName(null), "name", "Null name value"),
-                Arguments.of(generatePersonRequest().withName(StringUtils.EMPTY), "name", "Empty name value")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsWithEmptyValues")
-    void testPostPersonsWithEmptyValuesNegative(PersonRequest personRequest, String field, String description) {
-        ErrorMessage errorMessage =
-                postPerson(personRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyEmptyValueErrorMessages(errorMessage, field);
-    }
-
-    @Test
-    void testPostPersonsWithInvalidBirthdayNegative() {
-        String invalidBirthday = "1993-06-072";
-
-        ErrorMessage errorMessage =
-                postPerson(generatePersonRequest().withBirthday(invalidBirthday))
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyInvalidDateErrorMessages(errorMessage, invalidBirthday);
-    }
-
-    private static Stream<Arguments> getListOfPersonsWithInvalidCountry() {
-        return Stream.of(
-                Arguments.of(generatePersonRequest().withCountry("Invalid"), "Invalid country value"),
-                Arguments.of(generatePersonRequest().withCountry(StringUtils.EMPTY), "Empty country value")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getListOfPersonsWithInvalidCountry")
-    void testPostPersonsWithInvalidCountryNegative(PersonRequest personRequest, String description) {
-        ErrorMessage errorMessage =
-                postPerson(personRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyInvalidCountryErrorMessages(errorMessage);
+        verifyErrorMessages(errorMessage, expectedErrorMessage);
     }
 
 }

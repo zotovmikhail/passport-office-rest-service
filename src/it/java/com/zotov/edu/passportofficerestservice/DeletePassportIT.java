@@ -42,7 +42,7 @@ class DeletePassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonexistentPassportId, "Passport");
+        verifyErrorMessages(errorMessage, String.format("Passport with id '%s' is not found", nonexistentPassportId));
     }
 
     @Test
@@ -55,7 +55,7 @@ class DeletePassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonexistentPersonId));
     }
 
 }

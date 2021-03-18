@@ -30,39 +30,45 @@ class PutPersonIT extends BaseTest {
     @Test
     void testPutPersonAndVerify() {
         Person person = personDataHandler.generatePersonData();
-        PersonPutRequest personRequest = generatePersonPutRequest();
+        PersonPutRequest personPutRequest = generatePersonPutRequest();
 
         PersonResponse updatedPersonResponse =
-                putPerson(person.getId(), personRequest)
+                putPerson(person.getId(), personPutRequest)
                         .statusCode(200)
                         .extract()
                         .as(PersonResponse.class);
 
         assertThat(updatedPersonResponse.getId()).isEqualTo(person.getId());
-        assertThat(updatedPersonResponse.getName()).isEqualTo(personRequest.getName());
-        assertThat(updatedPersonResponse.getBirthday()).isEqualTo(personRequest.getBirthday());
-        assertThat(updatedPersonResponse.getCountry()).isEqualTo(personRequest.getCountry());
+        assertThat(updatedPersonResponse.getName()).isEqualTo(personPutRequest.getName());
+        assertThat(updatedPersonResponse.getBirthday()).isEqualTo(personPutRequest.getBirthday());
+        assertThat(updatedPersonResponse.getCountry()).isEqualTo(personPutRequest.getCountry());
 
         Person personFromDB = personsRepository
                 .findById(person.getId())
                 .orElseGet(() -> fail(String.format("Person '%s' is not found in the data.", person.getId())));
 
         assertThat(personFromDB.getId()).isEqualTo(person.getId());
-        assertThat(personFromDB.getName()).isEqualTo(personRequest.getName());
-        assertThat(personFromDB.getBirthday()).isEqualTo(personRequest.getBirthday());
-        assertThat(personFromDB.getCountry()).isEqualTo(personRequest.getCountry());
+        assertThat(personFromDB.getName()).isEqualTo(personPutRequest.getName());
+        assertThat(personFromDB.getBirthday()).isEqualTo(personPutRequest.getBirthday());
+        assertThat(personFromDB.getCountry()).isEqualTo(personPutRequest.getCountry());
     }
 
     private static Stream<Arguments> getPersonWithNullValuesToUpdate() {
         return Stream.of(
-                Arguments.of(generatePersonPutRequest().withBirthday(null), "birthday", "Null birthday value"),
-                Arguments.of(generatePersonPutRequest().withCountry(null), "country", "Null country value")
+                Arguments.of(generatePersonPutRequest().withBirthday(null), "birthday must not be null"),
+                Arguments.of(generatePersonPutRequest().withBirthday(StringUtils.EMPTY), "birthday must not be null"),
+                Arguments.of(generatePersonPutRequest().withCountry(null), "country must not be null"),
+                Arguments.of(generatePersonPutRequest().withName(null), "name must not be empty"),
+                Arguments.of(generatePersonPutRequest().withName(StringUtils.EMPTY), "name must not be empty"),
+                Arguments.of(generatePersonPutRequest().withBirthday("1993-06-072"), "Text '1993-06-072' could not be parsed, unparsed text found at index 10"),
+                Arguments.of(generatePersonPutRequest().withCountry("Invalid"), "country is not found in the list of available countries."),
+                Arguments.of(generatePersonPutRequest().withCountry(StringUtils.EMPTY), "country is not found in the list of available countries.")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getPersonWithNullValuesToUpdate")
-    void testPutPersonWithNullValuesNegative(PersonPutRequest personPutRequest, String field, String description) {
+    void testPutPersonNegative(PersonPutRequest personPutRequest, String expectedErrorMessage) {
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorResponse =
@@ -71,63 +77,7 @@ class PutPersonIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNullValueErrorMessages(errorResponse, field);
-    }
-
-    private static Stream<Arguments> getPersonForUpdateWithEmptyValuesToUpdate() {
-        return Stream.of(
-                Arguments.of(generatePersonPutRequest().withName(null), "name", "Null name value"),
-                Arguments.of(generatePersonPutRequest().withName(StringUtils.EMPTY), "name", "Empty name value")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getPersonForUpdateWithEmptyValuesToUpdate")
-    void testPutPersonWithEmptyValuesNegative(PersonPutRequest personPutRequest, String field, String description) {
-        Person person = personDataHandler.generatePersonData();
-
-        ErrorMessage errorResponse =
-                putPerson(person.getId(), personPutRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyEmptyValueErrorMessages(errorResponse, field);
-    }
-
-    @Test
-    void testPutPersonsWithInvalidBirthdayNegative() {
-        Person person = personDataHandler.generatePersonData();
-        String invalidBirthdayValue = "1993-06-072";
-
-        ErrorMessage errorMessage =
-                putPerson(person.getId(), generatePersonPutRequest().withBirthday(invalidBirthdayValue))
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyInvalidDateErrorMessages(errorMessage, invalidBirthdayValue);
-    }
-
-    private static Stream<Arguments> getPersonWithInvalidCountryToUpdate() {
-        return Stream.of(
-                Arguments.of(generatePersonPutRequest().withCountry("Invalid"), "Invalid country value"),
-                Arguments.of(generatePersonPutRequest().withCountry(StringUtils.EMPTY), "Empty country value")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getPersonWithInvalidCountryToUpdate")
-    void testPutPersonsWithInvalidCountryNegative(PersonPutRequest personPutRequest, String description) {
-        Person person = personDataHandler.generatePersonData();
-
-        ErrorMessage errorMessage =
-                putPerson(person.getId(), personPutRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyInvalidCountryErrorMessages(errorMessage);
+        verifyErrorMessages(errorResponse, expectedErrorMessage);
     }
 
     @Test
@@ -140,7 +90,7 @@ class PutPersonIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonexistentPersonId));
     }
 
 }

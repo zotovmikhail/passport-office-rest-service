@@ -46,31 +46,8 @@ abstract class BaseTest {
                 .build();
     }
 
-    void verifyErrorMessages(ErrorMessage errorMessage, List<String> expectedMessages) {
-        assertThat(errorMessage.getMessages()).isEqualTo(expectedMessages);
-    }
-
-    void verifyNullValueErrorMessages(ErrorMessage errorResponse, String field) {
-        verifyErrorMessages(errorResponse, List.of(String.format("%s must not be null", field)));
-    }
-
-    void verifyEmptyValueErrorMessages(ErrorMessage errorMessage, String field) {
-        verifyErrorMessages(errorMessage, List.of(String.format("%s must not be empty", field)));
-    }
-
-    void verifyInvalidDateErrorMessages(ErrorMessage errorMessage, String birthday) {
-        assertThat(errorMessage.getMessages().stream()
-                .findFirst()
-                .orElseGet(() -> fail("The Error Messages list from the response is empty.")))
-                .contains(String.format("Text '%s' could not be parsed", birthday));
-    }
-
-    void verifyInvalidCountryErrorMessages(ErrorMessage errorMessage) {
-        verifyErrorMessages(errorMessage, List.of("country is not found in the list of available countries."));
-    }
-
-    void verifyNotFoundErrorMessages(ErrorMessage errorMessage, String entityId, String entityName) {
-        assertThat(errorMessage.getMessages()).isEqualTo(List.of(String.format("%s with id '%s' is not found", entityName, entityId)));
+    void verifyErrorMessages(ErrorMessage errorMessage, String expectedMessage) {
+        assertThat(errorMessage.getMessages()).containsExactlyInAnyOrder(expectedMessage);
     }
 
     void verifyIsUUID(String id) {

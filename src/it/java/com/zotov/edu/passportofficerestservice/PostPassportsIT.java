@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
@@ -63,14 +62,17 @@ class PostPassportsIT extends BaseTest {
 
     private static Stream<Arguments> getPersonAndPassportWithNullValues() {
         return Stream.of(
-                Arguments.of(generatePassportRequest().withGivenDate(null), "givenDate", "Null given date value"),
-                Arguments.of(generatePassportRequest().withGivenDate(StringUtils.EMPTY), "givenDate", "Empty given date value")
+                Arguments.of(generatePassportRequest().withGivenDate(null), "givenDate must not be null"),
+                Arguments.of(generatePassportRequest().withGivenDate(StringUtils.EMPTY), "givenDate must not be null"),
+                Arguments.of(generatePassportRequest().withNumber(StringUtils.EMPTY), "number must not be empty"),
+                Arguments.of(generatePassportRequest().withDepartmentCode(StringUtils.EMPTY), "departmentCode must not be empty"),
+                Arguments.of(generatePassportRequest().withGivenDate("1993-06-072"), "Text '1993-06-072' could not be parsed, unparsed text found at index 10")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getPersonAndPassportWithNullValues")
-    void testPostPassportWithNullValuesNegative(PassportRequest passportRequest, String field, String description) {
+    void testPostPassportNegative(PassportRequest passportRequest, String expectedErrorMessage) {
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorMessage =
@@ -79,42 +81,7 @@ class PostPassportsIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNullValueErrorMessages(errorMessage, field);
-    }
-
-    private static Stream<Arguments> getPersonAndPassportWithEmptyValues() {
-        return Stream.of(
-                Arguments.of(generatePassportRequest().withNumber(StringUtils.EMPTY), "number", "Empty passport number value"),
-                Arguments.of(generatePassportRequest().withDepartmentCode(StringUtils.EMPTY), "departmentCode", "Empty department code value")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getPersonAndPassportWithEmptyValues")
-    void testPostPassportWithEmptyValuesNegative(PassportRequest passportRequest, String field, String description) {
-        Person person = personDataHandler.generatePersonData();
-
-        ErrorMessage errorMessage =
-                postPassport(person.getId(), passportRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyEmptyValueErrorMessages(errorMessage, field);
-    }
-
-    @Test
-    void testPostPassportWithInvalidGivenDateNegative() {
-        Person person = personDataHandler.generatePersonData();
-        PassportRequest passportRequestWithInvalidGivenDate = generatePassportRequest().withGivenDate("1993-06-072");
-
-        ErrorMessage errorMessage =
-                postPassport(person.getId(), passportRequestWithInvalidGivenDate)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyInvalidDateErrorMessages(errorMessage, passportRequestWithInvalidGivenDate.getGivenDate());
+        verifyErrorMessages(errorMessage, expectedErrorMessage);
     }
 
     @Test
@@ -127,7 +94,7 @@ class PostPassportsIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonExistentPersonId));
     }
 
     @Test
@@ -141,7 +108,7 @@ class PostPassportsIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyErrorMessages(errorMessage, List.of(String.format("Passport with id '%s' already exists in the data", passport.getNumber())));
+        verifyErrorMessages(errorMessage, String.format("Passport with id '%s' already exists in the data", passport.getNumber()));
     }
 
 }

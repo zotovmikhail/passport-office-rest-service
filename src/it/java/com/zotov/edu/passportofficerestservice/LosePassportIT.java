@@ -11,8 +11,6 @@ import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
 import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
@@ -61,7 +59,7 @@ class LosePassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyErrorMessages(errorMessage, List.of(String.format("Passport with number '%s' is already lost.", passport.getNumber())));
+        verifyErrorMessages(errorMessage, String.format("Passport with number '%s' is already lost.", passport.getNumber()));
     }
 
     @Test
@@ -75,7 +73,7 @@ class LosePassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonexistentPassportNumber, "Passport");
+        verifyErrorMessages(errorMessage, String.format("Passport with id '%s' is not found", nonexistentPassportNumber));
     }
 
     @Test
@@ -88,6 +86,6 @@ class LosePassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonexistentPersonId));
     }
 }

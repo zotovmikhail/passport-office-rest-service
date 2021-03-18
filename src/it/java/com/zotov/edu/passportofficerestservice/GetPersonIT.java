@@ -7,10 +7,9 @@ import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
-
 import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
+import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 import static org.assertj.core.api.Assertions.*;
 
 
@@ -35,7 +34,7 @@ class GetPersonIT extends BaseTest {
 
     @Test
     void testGetNonexistentPersonsByPersonIdNegative() {
-        String nonexistentPersonId = UUID.randomUUID().toString();
+        String nonexistentPersonId = generateRandomPersonId();
 
         ErrorMessage errorMessage =
                 getPerson(nonexistentPersonId)
@@ -43,7 +42,7 @@ class GetPersonIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonexistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonexistentPersonId));
     }
 
 }

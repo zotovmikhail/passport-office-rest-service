@@ -62,14 +62,17 @@ class PutPassportIT extends BaseTest {
 
     private static Stream<Arguments> getPassportWithNullValuesToUpdate() {
         return Stream.of(
-                Arguments.of(generatePassportPutRequest().withGivenDate(null), "givenDate", "Null given date value"),
-                Arguments.of(generatePassportPutRequest().withGivenDate(StringUtils.EMPTY), "givenDate", "Empty given date value")
+                Arguments.of(generatePassportPutRequest().withGivenDate(null), "givenDate must not be null"),
+                Arguments.of(generatePassportPutRequest().withGivenDate(StringUtils.EMPTY), "givenDate must not be null"),
+                Arguments.of(generatePassportPutRequest().withDepartmentCode(StringUtils.EMPTY), "departmentCode must not be empty"),
+                Arguments.of(generatePassportPutRequest().withGivenDate("1993-06-072"), "Text '1993-06-072' could not be parsed, unparsed text found at index 10")
+
         );
     }
 
     @ParameterizedTest
     @MethodSource("getPassportWithNullValuesToUpdate")
-    void testPutPassportWithNullValuesNegative(PassportPutRequest passportRequest, String field, String description) {
+    void testPutPassportNegative(PassportPutRequest passportRequest, String expectedErrorMessage) {
         Person person = personDataHandler.generatePersonData();
         Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
 
@@ -79,43 +82,7 @@ class PutPassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNullValueErrorMessages(errorMessage, field);
-    }
-
-    private static Stream<Arguments> getPassportWithEmptyValuesToUpdate() {
-        return Stream.of(
-                Arguments.of(generatePassportPutRequest().withDepartmentCode(StringUtils.EMPTY), "departmentCode", "Empty department code value")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("getPassportWithEmptyValuesToUpdate")
-    void testPutPassportWithEmptyValuesNegative(PassportPutRequest passportRequest, String field, String description) {
-        Person person = personDataHandler.generatePersonData();
-        Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
-
-        ErrorMessage errorMessage =
-                putPassport(person.getId(), initialPassport.getNumber(), passportRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyEmptyValueErrorMessages(errorMessage, field);
-    }
-
-    @Test
-    void testPutPassportWithInvalidGivenDateNegative() {
-        Person person = personDataHandler.generatePersonData();
-        Passport initialPassport = passportDataHandler.generatePassportData(person.getId());
-        PassportPutRequest passportPutRequest = generatePassportPutRequest().withGivenDate("1993-06-072");
-
-        ErrorMessage errorMessage =
-                putPassport(person.getId(), initialPassport.getNumber(), passportPutRequest)
-                        .statusCode(400)
-                        .extract()
-                        .as(ErrorMessage.class);
-
-        verifyInvalidDateErrorMessages(errorMessage, passportPutRequest.getGivenDate());
+        verifyErrorMessages(errorMessage, expectedErrorMessage);
     }
 
     @Test
@@ -128,7 +95,7 @@ class PutPassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonExistentPersonId, "Person");
+        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonExistentPersonId));
     }
 
     @Test
@@ -142,7 +109,7 @@ class PutPassportIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyNotFoundErrorMessages(errorMessage, nonExistentPassportNumber, "Passport");
+        verifyErrorMessages(errorMessage, String.format("Passport with id '%s' is not found", nonExistentPassportNumber));
     }
 
 }
