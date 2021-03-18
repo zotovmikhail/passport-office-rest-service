@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -33,7 +34,10 @@ public class PersonExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ErrorResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
-        return new ErrorResponse(Collections.singletonList(exception.getMessage()));
+        return new ErrorResponse(Collections.singletonList(
+                Optional.ofNullable(exception.getRootCause())
+                        .map(Throwable::getMessage)
+                        .orElseGet(exception::getMessage)));
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
