@@ -1,7 +1,7 @@
 package com.zotov.edu.passportofficerestservice.util;
 
 import com.zotov.edu.passportofficerestservice.model.PassportPutRequest;
-import com.zotov.edu.passportofficerestservice.model.PassportRequest;
+import com.zotov.edu.passportofficerestservice.model.PassportPostRequest;
 import io.restassured.response.ValidatableResponse;
 import lombok.experimental.UtilityClass;
 
@@ -13,9 +13,9 @@ import static io.restassured.RestAssured.*;
 
 @UtilityClass
 public class PassportRequests {
-    public ValidatableResponse postPassport(String personId, PassportRequest passportRequest) {
+    public ValidatableResponse postPassport(String personId, PassportPostRequest passportPostRequest) {
         return given()
-                .body(passportRequest)
+                .body(passportPostRequest)
                 .pathParam("personId", personId)
                 .when()
                 .post("/persons/{personId}/passports")

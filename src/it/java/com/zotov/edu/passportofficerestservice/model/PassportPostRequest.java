@@ -6,7 +6,7 @@ import lombok.With;
 
 @Data
 @Builder
-public class PassportRequest {
+public class PassportPostRequest {
     @With
     private String number;
 

@@ -3,7 +3,7 @@ package com.zotov.edu.passportofficerestservice;
 import com.zotov.edu.passportofficerestservice.extension.TestConfigurationExtension;
 import com.zotov.edu.passportofficerestservice.extension.TestExecutionLoggerExtension;
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
-import com.zotov.edu.passportofficerestservice.model.PassportRequest;
+import com.zotov.edu.passportofficerestservice.model.PassportPostRequest;
 import com.zotov.edu.passportofficerestservice.model.PassportResponse;
 import com.zotov.edu.passportofficerestservice.repository.PassportsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
@@ -46,26 +46,26 @@ class PostPassportsIT {
     @Test
     void testPostPassportAndVerify() {
         Person person = personDataHandler.generatePersonData();
-        PassportRequest passportRequest = generatePassportRequest();
+        PassportPostRequest passportPostRequest = generatePassportRequest();
 
         PassportResponse passportResponse =
-                postPassport(person.getId(), passportRequest)
+                postPassport(person.getId(), passportPostRequest)
                         .statusCode(201)
                         .extract()
                         .as(PassportResponse.class);
 
-        assertThat(passportResponse.getNumber()).isEqualTo(passportRequest.getNumber());
-        assertThat(passportResponse.getDepartmentCode()).isEqualTo(passportRequest.getDepartmentCode());
-        assertThat(passportResponse.getGivenDate()).isEqualTo(passportRequest.getGivenDate());
+        assertThat(passportResponse.getNumber()).isEqualTo(passportPostRequest.getNumber());
+        assertThat(passportResponse.getDepartmentCode()).isEqualTo(passportPostRequest.getDepartmentCode());
+        assertThat(passportResponse.getGivenDate()).isEqualTo(passportPostRequest.getGivenDate());
 
         Passport passportFromDB = passportsRepository
-                .findByPassportNumber(passportRequest.getNumber())
-                .orElseGet(() -> fail(String.format("Passport '%s' is not found in the database", passportRequest.getNumber())));
+                .findByPassportNumber(passportPostRequest.getNumber())
+                .orElseGet(() -> fail(String.format("Passport '%s' is not found in the database", passportPostRequest.getNumber())));
 
         assertThat(passportFromDB.getOwnerId()).isEqualTo(person.getId());
-        assertThat(passportFromDB.getNumber()).isEqualTo(passportRequest.getNumber());
-        assertThat(passportFromDB.getDepartmentCode()).isEqualTo(passportRequest.getDepartmentCode());
-        assertThat(passportFromDB.getGivenDate()).isEqualTo(passportRequest.getGivenDate());
+        assertThat(passportFromDB.getNumber()).isEqualTo(passportPostRequest.getNumber());
+        assertThat(passportFromDB.getDepartmentCode()).isEqualTo(passportPostRequest.getDepartmentCode());
+        assertThat(passportFromDB.getGivenDate()).isEqualTo(passportPostRequest.getGivenDate());
         assertThat(passportFromDB.getState()).isEqualTo(PassportState.ACTIVE);
     }
 
@@ -81,11 +81,11 @@ class PostPassportsIT {
 
     @ParameterizedTest
     @MethodSource("getPersonAndPassportWithNullValues")
-    void testPostPassportNegative(PassportRequest passportRequest, String expectedErrorMessage) {
+    void testPostPassportNegative(PassportPostRequest passportPostRequest, String expectedErrorMessage) {
         Person person = personDataHandler.generatePersonData();
 
         ErrorMessage errorMessage =
-                postPassport(person.getId(), passportRequest)
+                postPassport(person.getId(), passportPostRequest)
                         .statusCode(400)
                         .extract()
                         .as(ErrorMessage.class);

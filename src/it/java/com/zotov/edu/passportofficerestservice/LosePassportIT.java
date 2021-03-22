@@ -42,13 +42,13 @@ class LosePassportIT {
         Passport passport = passportDataHandler.generatePassportData(generatePassport(person.getId()));
         PassportResponse expectedPassportResponse = convertToPassportResponse(passport);
 
-        PassportResponse lostPassportSpecification =
+        PassportResponse passportResponse =
                 losePassport(passport.getOwnerId(), passport.getNumber())
                         .statusCode(200)
                         .extract()
                         .as(PassportResponse.class);
 
-        assertThat(lostPassportSpecification).isEqualTo(expectedPassportResponse);
+        assertThat(passportResponse).isEqualTo(expectedPassportResponse);
 
         Passport foundPassport = passportsRepository
                 .findByPassportNumber(passport.getNumber())

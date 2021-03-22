@@ -1,7 +1,7 @@
 package com.zotov.edu.passportofficerestservice.util;
 
 import com.github.javafaker.Faker;
-import com.zotov.edu.passportofficerestservice.model.PassportRequest;
+import com.zotov.edu.passportofficerestservice.model.PassportPostRequest;
 import com.zotov.edu.passportofficerestservice.model.PassportResponse;
 import com.zotov.edu.passportofficerestservice.model.PersonPutRequest;
 import com.zotov.edu.passportofficerestservice.model.PersonRequest;
@@ -56,8 +56,8 @@ public class RandomDataGenerator {
                 .collect(Collectors.toList());
     }
 
-    public PassportRequest generatePassportRequest() {
-        return PassportRequest.builder()
+    public PassportPostRequest generatePassportRequest() {
+        return PassportPostRequest.builder()
                 .number(generateRandomPassportNumber())
                 .givenDate(generateRandomDate())
                 .departmentCode(generateRandomDepartmentCode())
