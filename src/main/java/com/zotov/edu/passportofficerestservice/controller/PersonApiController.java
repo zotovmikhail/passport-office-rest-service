@@ -1,10 +1,9 @@
 package com.zotov.edu.passportofficerestservice.controller;
 
 import com.zotov.edu.passportofficerestservice.controller.converter.PassportControllerDtoConverter;
+import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportPostRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportPutRequest;
-import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PersonRequest;
-import com.zotov.edu.passportofficerestservice.controller.dto.response.PageResponse;
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PassportResponse;
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
@@ -13,6 +12,7 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.service.PassportService;
 import com.zotov.edu.passportofficerestservice.service.PersonService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,13 +37,13 @@ public class PersonApiController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public PageResponse<PersonResponse> getPersons(@RequestParam(required = false, name = "passportNumber")
+    public Page<PersonResponse> getPersons(@RequestParam(required = false, name = "passportNumber")
                                                    Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
-        return new PageResponse<>(passportNumber
+        return passportNumber
                 .map(existentPassportNumber -> personsService.getPersonByPassportNumber(existentPassportNumber, pageable))
                 .orElseGet(() -> personsService.getAllPersons(pageable))
-                .map(passportControllerDtoConverter::convertPersonToDto));
+                .map(passportControllerDtoConverter::convertPersonToDto);
     }
 
     @PostMapping()
@@ -92,11 +92,11 @@ public class PersonApiController {
     @PostMapping("/{personId}/passports")
     @ResponseStatus(HttpStatus.CREATED)
     public PassportResponse createPassport(@PathVariable("personId") String personId,
-                                           @Valid @RequestBody PassportRequest passportRequest) {
+                                           @Valid @RequestBody PassportPostRequest passportPostRequest) {
         personsService.checkIfPersonExists(personId);
         Passport createdPassport = passportService.createPassport(
-                personId, passportRequest.getNumber(),
-                passportRequest.getGivenDate(), passportRequest.getDepartmentCode());
+                personId, passportPostRequest.getNumber(),
+                passportPostRequest.getGivenDate(), passportPostRequest.getDepartmentCode());
         return passportControllerDtoConverter.convertPassportToDto(createdPassport);
     }
 

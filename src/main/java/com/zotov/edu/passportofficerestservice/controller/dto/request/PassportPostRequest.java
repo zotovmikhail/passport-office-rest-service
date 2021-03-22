@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
-public final class PassportRequest {
+public final class PassportPostRequest {
 
     @NotEmpty
     private final String number;

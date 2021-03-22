@@ -1,7 +1,7 @@
 package com.zotov.edu.passportofficerestservice.util;
 
-import com.zotov.edu.passportofficerestservice.model.PassportPutRequest;
 import com.zotov.edu.passportofficerestservice.model.PassportPostRequest;
+import com.zotov.edu.passportofficerestservice.model.PassportPutRequest;
 import com.zotov.edu.passportofficerestservice.model.PassportResponse;
 import com.zotov.edu.passportofficerestservice.model.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
