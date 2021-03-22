@@ -1,5 +1,7 @@
 package com.zotov.edu.passportofficerestservice;
 
+import com.zotov.edu.passportofficerestservice.extension.TestConfigurationExtension;
+import com.zotov.edu.passportofficerestservice.extension.TestExecutionLoggerExtension;
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
 import com.zotov.edu.passportofficerestservice.model.PassportRequest;
 import com.zotov.edu.passportofficerestservice.model.PassportResponse;
@@ -9,12 +11,16 @@ import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PassportDataHandler;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
+import com.zotov.edu.passportofficerestservice.util.ReplaceCamelCase;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.stream.Stream;
 
@@ -23,7 +29,10 @@ import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 import static org.assertj.core.api.Assertions.*;
 
-class PostPassportsIT extends BaseTest {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DisplayNameGeneration(ReplaceCamelCase.class)
+@ExtendWith({TestExecutionLoggerExtension.class, TestConfigurationExtension.class})
+class PostPassportsIT {
 
     @Autowired
     private PersonDataHandler personDataHandler;
@@ -81,7 +90,7 @@ class PostPassportsIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyErrorMessages(errorMessage, expectedErrorMessage);
+        assertThat(errorMessage.getMessages()).containsExactlyInAnyOrder(expectedErrorMessage);
     }
 
     @Test
@@ -94,7 +103,7 @@ class PostPassportsIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyErrorMessages(errorMessage, String.format("Person with id '%s' is not found", nonExistentPersonId));
+        assertThat(errorMessage.getMessages()).containsExactlyInAnyOrder(String.format("Person with id '%s' is not found", nonExistentPersonId));
     }
 
     @Test
@@ -108,7 +117,7 @@ class PostPassportsIT extends BaseTest {
                         .extract()
                         .as(ErrorMessage.class);
 
-        verifyErrorMessages(errorMessage, String.format("Passport with id '%s' already exists in the data", passport.getNumber()));
+        assertThat(errorMessage.getMessages()).containsExactlyInAnyOrder(String.format("Passport with id '%s' already exists in the data", passport.getNumber()));
     }
 
 }
