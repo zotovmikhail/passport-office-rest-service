@@ -20,4 +20,8 @@ public interface PassportsRepository {
     void deleteById(String passportNumber);
 
     void deleteAllByOwnerId(String ownerId);
+
+    void saveAll(List<Passport> convertToPassportEntities);
+
+    boolean existsByPassportNumber(String passportNumber);
 }

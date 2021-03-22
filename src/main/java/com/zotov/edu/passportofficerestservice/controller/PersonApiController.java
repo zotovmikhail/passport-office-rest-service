@@ -1,8 +1,8 @@
 package com.zotov.edu.passportofficerestservice.controller;
 
 import com.zotov.edu.passportofficerestservice.controller.converter.PassportControllerDtoConverter;
+import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportPostRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportPutRequest;
-import com.zotov.edu.passportofficerestservice.controller.dto.request.PassportRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.request.PersonRequest;
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PassportResponse;
 import com.zotov.edu.passportofficerestservice.controller.dto.response.PersonResponse;
@@ -41,7 +41,7 @@ public class PersonApiController {
                                                    Optional<String> passportNumber,
                                            @PageableDefault(size = 100) Pageable pageable) {
         return passportNumber
-                .map(personsService::getPersonByPassportNumber)
+                .map(existentPassportNumber -> personsService.getPersonByPassportNumber(existentPassportNumber, pageable))
                 .orElseGet(() -> personsService.getAllPersons(pageable))
                 .map(passportControllerDtoConverter::convertPersonToDto);
     }
@@ -92,11 +92,11 @@ public class PersonApiController {
     @PostMapping("/{personId}/passports")
     @ResponseStatus(HttpStatus.CREATED)
     public PassportResponse createPassport(@PathVariable("personId") String personId,
-                                           @Valid @RequestBody PassportRequest passportRequest) {
+                                           @Valid @RequestBody PassportPostRequest passportPostRequest) {
         personsService.checkIfPersonExists(personId);
         Passport createdPassport = passportService.createPassport(
-                personId, passportRequest.getNumber(),
-                passportRequest.getGivenDate(), passportRequest.getDepartmentCode());
+                personId, passportPostRequest.getNumber(),
+                passportPostRequest.getGivenDate(), passportPostRequest.getDepartmentCode());
         return passportControllerDtoConverter.convertPassportToDto(createdPassport);
     }
 
@@ -111,9 +111,9 @@ public class PersonApiController {
 
     @PutMapping("/{personId}/passports/{passportNumber}")
     @ResponseStatus(HttpStatus.OK)
-    public PassportResponse updatePerson(@PathVariable("personId") String personId,
+    public PassportResponse updatePassport(@PathVariable("personId") String personId,
                                          @PathVariable("passportNumber") String passportNumber,
-                                         @RequestBody PassportPutRequest passportRequest) {
+                                         @Valid @RequestBody PassportPutRequest passportRequest) {
         personsService.checkIfPersonExists(personId);
         Passport updatedPassport = passportService.updatePassport(
                 passportNumber, passportRequest.getGivenDate(), passportRequest.getDepartmentCode());

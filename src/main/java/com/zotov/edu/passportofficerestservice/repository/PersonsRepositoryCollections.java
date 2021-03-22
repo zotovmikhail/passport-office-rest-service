@@ -52,4 +52,11 @@ public class PersonsRepositoryCollections implements PersonsRepository {
             throw new PersonNotFoundException(id);
         }
     }
+
+    @Override
+    public void saveAll(List<Person> personsToAdd) {
+        Map<String, Person> personsMap = personsToAdd.stream()
+                .collect(Collectors.toMap(Person::getId, person -> person));
+        persons.putAll(personsMap);
+    }
 }

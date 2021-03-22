@@ -205,6 +205,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   '/persons/{personId}/passports/{passportNumber}':
     get:
       tags:
@@ -484,26 +490,15 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              content:
-                type: array
-                items:
-                  oneOf:
-                    - type: object
-                      properties:
-                        number:
-                          type: string
-                        givenDate:
-                          type: string
-                          format: date
-                        departmentCode:
-                          type: string
-              number:
-                type: integer
-              size:
-                type: integer
-              totalPages:
-                type: integer
-              totalElements:
-                type: integer
+            type: array
+            items:
+              oneOf:
+                - type: object
+                  properties:
+                    number:
+                      type: string
+                    givenDate:
+                      type: string
+                      format: date
+                    departmentCode:
+                      type: string
