@@ -31,7 +31,7 @@ public class PersonService {
 
     public Person createPerson(String name, LocalDate birthday, String country) {
         Person person = personConverter.convertToEntity(name, birthday, country);
-        return personsRepository.save(person);
+        return personsRepository.create(person);
     }
 
     public Person getPerson(String personId) {

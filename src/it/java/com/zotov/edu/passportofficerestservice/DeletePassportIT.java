@@ -13,6 +13,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
@@ -21,7 +24,12 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(ReplaceCamelCase.class)
 @ExtendWith({TestExecutionLoggerExtension.class, TestConfigurationExtension.class})
+@Testcontainers
 class DeletePassportIT {
+
+    @Container
+    private static PostgreSQLContainer<?> postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres");
 
     @Autowired
     private PersonDataHandler personDataHandler;
@@ -32,7 +40,7 @@ class DeletePassportIT {
     @Test
     void testDeletePassportAndVerify() {
         Person person = personDataHandler.generatePersonData();
-        Passport passport = passportsRepository.save((generatePassport(person.getId())));
+        Passport passport = passportsRepository.create((generatePassport(person.getId())));
 
         deletePassport(passport.getOwnerId(), passport.getNumber())
                 .statusCode(204);

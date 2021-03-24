@@ -1,3 +1,12 @@
+spring:
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:5432/passport_office
+    username: postgres
+    password: 86088290
+    driverClassName: org.postgresql.Driver
+  flyway:
+    locations: "classpath:db/migration"
 logging:
   level:
     ROOT: INFO

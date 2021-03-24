@@ -18,7 +18,7 @@ public class PersonDataHandler {
     }
 
     public Person generatePersonData() {
-        return personsRepository.save(generatePerson());
+        return personsRepository.create(generatePerson());
     }
 
 }

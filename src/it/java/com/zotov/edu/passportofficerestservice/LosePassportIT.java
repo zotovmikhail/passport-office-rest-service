@@ -16,6 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PassportRequests.*;
@@ -25,7 +28,12 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayNameGeneration(ReplaceCamelCase.class)
 @ExtendWith({TestExecutionLoggerExtension.class, TestConfigurationExtension.class})
+@Testcontainers
 class LosePassportIT {
+
+    @Container
+    private static PostgreSQLContainer<?> postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres");
 
     @Autowired
     private PersonDataHandler personDataHandler;

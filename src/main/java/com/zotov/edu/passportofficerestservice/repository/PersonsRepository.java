@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface PersonsRepository {
     Page<Person> findAll(Pageable pageable);
 
+    Person create(Person person);
+
     Person save(Person s);
 
     Optional<Person> findById(String id);
