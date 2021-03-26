@@ -3,11 +3,8 @@ package com.zotov.edu.passportofficerestservice.repository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlreadyExistsException;
-import com.zotov.edu.passportofficerestservice.repository.mapper.PassportRowMapper;
 import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
-import lombok.AllArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -18,10 +15,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-@AllArgsConstructor
+@ConditionalOnProperty(value = "application.repository", havingValue = "memory")
 public class PassportsRepositoryCollections implements PassportsRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    Map<String, Passport> passports = new HashMap<>();
 
     @Override
     public Passport create(Passport passport) {
@@ -29,63 +26,57 @@ public class PassportsRepositoryCollections implements PassportsRepository {
                 .ifPresent(foundPassport -> {
                     throw new PassportAlreadyExistsException(foundPassport.getNumber());
                 });
-
-        jdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) values (?, ?, ?, ?, ?)",
-                passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().toString(), passport.getOwnerId());
-
-        return passport;
+        return save(passport);
     }
 
     @Override
     public Passport save(Passport passport) {
-        jdbcTemplate.update("update passports set given_date =?, department_code =?, state =?, owner_id =? where number =?",
-                passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().toString(), passport.getOwnerId(), passport.getNumber());
-
+        passports.put(passport.getNumber(), passport);
         return passport;
     }
 
     @Override
     public Optional<Passport> findByPassportNumber(String passportNumber) {
-        List<Passport> foundPassports = jdbcTemplate.query("select * from passports where number =?",
-                new PassportRowMapper(), passportNumber);
-        return foundPassports.stream().findFirst();
+        return Optional.ofNullable(passports.get(passportNumber));
     }
 
     @Override
     public List<Passport> findByOwnerIdAndStateAndGivenDateBetween(
             String personId, PassportState state, LocalDate minGivenDate, LocalDate maxGivenDate) {
-
-        return jdbcTemplate.query("select * from passports where state =? and owner_id =?",
-                new PassportRowMapper(), state.toString(), personId);
+        return passports
+                .values()
+                .stream()
+                .filter(passport -> passport.getOwnerId().equals(personId) && passport.getState().equals(state))
+                .filter(minGivenDate != null ? passport -> passport.getGivenDate().isAfter(minGivenDate) : passport -> true)
+                .filter(maxGivenDate != null ? passport -> passport.getGivenDate().isBefore(maxGivenDate) : passport -> true)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(String passportNumber) {
-        int numberOfDeletedEntities = jdbcTemplate.update("delete from passports where number =?", passportNumber);
-        if (numberOfDeletedEntities == 0) {
+        if (passports.remove(passportNumber) == null) {
             throw new PassportNotFoundException(passportNumber);
         }
     }
 
     @Override
     public void deleteAllByOwnerId(String ownerId) {
-        jdbcTemplate.update("delete from passports where owner_id =?", ownerId);
+        passports.values()
+                .stream()
+                .filter(passport -> passport.getOwnerId().equals(ownerId))
+                .collect(Collectors.toList())
+                .forEach(passport -> passports.remove(passport.getNumber()));
     }
 
     @Override
     public boolean existsByPassportNumber(String passportNumber) {
-        return jdbcTemplate.queryForObject("select exists(select * from passports where number =?)",
-                Boolean.class, passportNumber);
+        return passports.containsKey(passportNumber);
     }
 
     @Override
     public void saveAll(List<Passport> passportsToAdd) {
-        List<Object[]> parametersToUpdate = passportsToAdd
-                .stream()
-                .map(passport -> new Object[]{
-                        passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState(), passport.getOwnerId()})
-                .collect(Collectors.toList());
-
-        jdbcTemplate.batchUpdate("insert into passports values (?, ?, ?, ?, ?)", parametersToUpdate);
+        Map<String, Passport> personsMap = passportsToAdd.stream()
+                .collect(Collectors.toMap(Passport::getNumber, person -> person));
+        passports.putAll(personsMap);
     }
 }

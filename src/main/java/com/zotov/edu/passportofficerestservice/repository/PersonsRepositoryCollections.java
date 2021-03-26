@@ -1,13 +1,11 @@
 package com.zotov.edu.passportofficerestservice.repository;
 
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
-import com.zotov.edu.passportofficerestservice.repository.mapper.PersonRowMapper;
 import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
-import lombok.AllArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.LinkedHashMap;
@@ -17,63 +15,55 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
-@AllArgsConstructor
+@ConditionalOnProperty(value = "application.repository", havingValue = "memory")
 public class PersonsRepositoryCollections implements PersonsRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    Map<String, Person> persons = new LinkedHashMap<>();
 
     @Override
     public Page<Person> findAll(Pageable pageable) {
-        List<Person> personsFromData = jdbcTemplate.query("select * from persons limit ? offset ?", new PersonRowMapper(),
-                pageable.getPageSize(), pageable.getOffset());
+        List<Person> personsFromData = persons.entrySet()
+                .stream()
+                .skip(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
 
-        return new PageImpl<>(personsFromData, pageable, personsFromData.size());
-    }
-
-    @Override
-    public Person save(Person person) {
-        jdbcTemplate.update("update persons set name =?, birthday =?, country =? where id =?",
-                person.getName(), person.getBirthday(), person.getCountry(), person.getId());
-
-        return person;
+        return new PageImpl<>(personsFromData, pageable, persons.size());
     }
 
     @Override
     public Person create(Person person) {
-        jdbcTemplate.update("insert into persons(id, name, birthday, country) values(?, ?, ?, ?)",
-                person.getId(), person.getName(), person.getBirthday(), person.getCountry());
+        return save(person);
+    }
 
+    @Override
+    public Person save(Person person) {
+        persons.put(person.getId(), person);
         return person;
     }
 
     @Override
     public Optional<Person> findById(String id) {
-        List<Person> foundPersons = jdbcTemplate.query("select * from persons where id =?", new PersonRowMapper(), id);
-
-        return foundPersons.stream().findFirst();
+        return Optional.ofNullable(persons.get(id));
     }
 
     @Override
     public boolean existsById(String id) {
-        return jdbcTemplate.queryForObject("select exists(select * from persons where id=?)", Boolean.class, id);
+        return persons.containsKey(id);
     }
 
     @Override
     public void deleteById(String id) {
-        int numberOfDeletedEntities = jdbcTemplate.update("delete from persons where id=?", id);
-
-        if (numberOfDeletedEntities == 0) {
+        if (persons.remove(id) == null) {
             throw new PersonNotFoundException(id);
         }
     }
 
     @Override
     public void saveAll(List<Person> personsToAdd) {
-        List<Object[]> parametersToUpdate = personsToAdd
-                .stream()
-                .map(person -> new Object[]{person.getId(), person.getName(), person.getBirthday(), person.getCountry()})
-                .collect(Collectors.toList());
-
-        jdbcTemplate.batchUpdate("insert into persons values(?, ? ,? ,?)", parametersToUpdate);
+        Map<String, Person> personsMap = personsToAdd.stream()
+                .collect(Collectors.toMap(Person::getId, person -> person));
+        persons.putAll(personsMap);
     }
 }
