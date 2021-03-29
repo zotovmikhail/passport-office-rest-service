@@ -1,15 +1,15 @@
 application:
-  repository: memory
+  repository: jdbc
 spring:
   datasource:
     platform: postgres
-    url: jdbc:postgresql://localhost:5432/passport_office
-    username: postgres
-    password: 86088290
     driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://db:5432/passport_office
+    password: postgres
+    username: postgres
   flyway:
     locations: "classpath:db/migration"
-    enabled: false
+    enabled: true
 logging:
   level:
     ROOT: INFO
