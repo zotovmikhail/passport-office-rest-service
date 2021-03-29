@@ -54,7 +54,7 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
     }
 
     @Override
-    public boolean existsById(String id) {
+    public Boolean existsById(String id) {
         return jdbcTemplate.queryForObject("select exists(select * from persons where id=?)", Boolean.class, id);
     }
 

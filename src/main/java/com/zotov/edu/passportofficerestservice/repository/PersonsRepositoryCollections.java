@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @ConditionalOnProperty(value = "application.repository", havingValue = "memory")
 public class PersonsRepositoryCollections implements PersonsRepository {
 
-    Map<String, Person> persons = new LinkedHashMap<>();
+    private final Map<String, Person> persons = new LinkedHashMap<>();
 
     @Override
     public Page<Person> findAll(Pageable pageable) {
@@ -49,7 +49,7 @@ public class PersonsRepositoryCollections implements PersonsRepository {
     }
 
     @Override
-    public boolean existsById(String id) {
+    public Boolean existsById(String id) {
         return persons.containsKey(id);
     }
 

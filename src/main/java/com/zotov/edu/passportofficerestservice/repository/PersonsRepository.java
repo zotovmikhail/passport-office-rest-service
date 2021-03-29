@@ -16,7 +16,7 @@ public interface PersonsRepository {
 
     Optional<Person> findById(String id);
 
-    boolean existsById(String id);
+    Boolean existsById(String id);
 
     void deleteById(String id);
 

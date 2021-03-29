@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Repository
@@ -73,19 +72,9 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
     }
 
     @Override
-    public boolean existsByPassportNumber(String passportNumber) {
+    public Boolean existsByPassportNumber(String passportNumber) {
         return jdbcTemplate.queryForObject("select exists(select * from passports where number =?)",
                 Boolean.class, passportNumber);
     }
 
-    @Override
-    public void saveAll(List<Passport> passportsToAdd) {
-        List<Object[]> parametersToUpdate = passportsToAdd
-                .stream()
-                .map(passport -> new Object[]{
-                        passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState(), passport.getOwnerId()})
-                .collect(Collectors.toList());
-
-        jdbcTemplate.batchUpdate("insert into passports values (?, ?, ?, ?, ?)", parametersToUpdate);
-    }
 }
