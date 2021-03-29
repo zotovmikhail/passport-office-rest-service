@@ -53,9 +53,10 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
     @Override
     public List<Passport> findByOwnerIdAndStateAndGivenDateBetween(
             String personId, PassportState state, LocalDate minGivenDate, LocalDate maxGivenDate) {
-
-        return jdbcTemplate.query("select * from passports where state =? and owner_id =?",
-                new PassportRowMapper(), state.toString(), personId);
+        return jdbcTemplate.query("select * from passports where state =? and owner_id =? " +
+                        "and (?::date is null or given_date >?) " +
+                        "and (?::date is null or given_date <?)", new PassportRowMapper(),
+                state.toString(), personId, minGivenDate, minGivenDate, maxGivenDate, maxGivenDate);
     }
 
     @Override
