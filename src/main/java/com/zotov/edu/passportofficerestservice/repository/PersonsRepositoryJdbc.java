@@ -22,9 +22,11 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final PersonRowMapper personRowMapper;
+
     @Override
     public Page<Person> findAll(Pageable pageable) {
-        List<Person> personsFromData = jdbcTemplate.query("select * from persons limit ? offset ?", new PersonRowMapper(),
+        List<Person> personsFromData = jdbcTemplate.query("select * from persons limit ? offset ?", personRowMapper,
                 pageable.getPageSize(), pageable.getOffset());
 
         return new PageImpl<>(personsFromData, pageable, personsFromData.size());
@@ -48,7 +50,7 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     @Override
     public Optional<Person> findById(String id) {
-        List<Person> foundPersons = jdbcTemplate.query("select * from persons where id =?", new PersonRowMapper(), id);
+        List<Person> foundPersons = jdbcTemplate.query("select * from persons where id =?", personRowMapper, id);
 
         return foundPersons.stream().findFirst();
     }

@@ -21,6 +21,8 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final PassportRowMapper passportRowMapper;
+
     @Override
     public Passport create(Passport passport) {
         findByPassportNumber(passport.getNumber())
@@ -45,7 +47,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
     @Override
     public Optional<Passport> findByPassportNumber(String passportNumber) {
         List<Passport> foundPassports = jdbcTemplate.query("select * from passports where number =?",
-                new PassportRowMapper(), passportNumber);
+                passportRowMapper, passportNumber);
         return foundPassports.stream().findFirst();
     }
 
@@ -54,7 +56,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
             String personId, PassportState state, LocalDate minGivenDate, LocalDate maxGivenDate) {
         return jdbcTemplate.query("select * from passports where state =? and owner_id =? " +
                         "and (?::date is null or given_date >?) " +
-                        "and (?::date is null or given_date <?)", new PassportRowMapper(),
+                        "and (?::date is null or given_date <?)", passportRowMapper,
                 state.getDatabaseName(), personId, minGivenDate, minGivenDate, maxGivenDate, maxGivenDate);
     }
 
