@@ -29,7 +29,11 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
         List<Person> personsFromData = jdbcTemplate.query("select * from persons limit ? offset ?", personRowMapper,
                 pageable.getPageSize(), pageable.getOffset());
 
-        return new PageImpl<>(personsFromData, pageable, personsFromData.size());
+        Integer numberOfPersons = Optional.ofNullable(
+                jdbcTemplate.queryForObject("select count(*) from persons", Integer.class))
+                .orElse(0);
+
+        return new PageImpl<>(personsFromData, pageable, numberOfPersons);
     }
 
     @Override

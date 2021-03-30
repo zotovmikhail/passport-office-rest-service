@@ -47,20 +47,21 @@ class GetPersonsIT {
 
     private static Stream<Arguments> getListOfPersons() {
         return Stream.of(
-                Arguments.of(null, null, 100, 0, "Default page size and page number"),
-                Arguments.of("100", "0", 100, 0, "Valid page size and page number"),
-                Arguments.of("50", "4", 50, 4, "Page other than the first one"),
-                Arguments.of("invalidPageSize", "invalidPageNumber", 100, 0, "Invalid page size and page number"),
-                Arguments.of("100000000000000", "10000000000000000", 100, 0, "Too big page size and page number"),
-                Arguments.of("-1", "-1", 100, 0, "Negative page size and page number"),
-                Arguments.of("0", "0", 100, 0, "Zero page size and page number")
+                Arguments.of(null, null, 100, 0, 200, "Default page size and page number"),
+                Arguments.of("100", "0", 100, 0, 100, "Valid page size and page number"),
+                Arguments.of("50", "4", 50, 4, 200, "Page other than the first one"),
+                Arguments.of("invalidPageSize", "invalidPageNumber", 100, 0, 100, "Invalid page size and page number"),
+                Arguments.of("100000000000000", "10000000000000000", 100, 0, 100, "Too big page size and page number"),
+                Arguments.of("-1", "-1", 100, 0, 100, "Negative page size and page number"),
+                Arguments.of("0", "0", 100, 0, 100, "Zero page size and page number")
         );
     }
 
     @ParameterizedTest
     @MethodSource("getListOfPersons")
-    void testGetPersonsAndVerifyDefaultValues(String pageSize, String pageNumber, int expectedPageSize, int expectedPageNumber, String description) {
-        personDataHandler.generatePersonsData(200);
+    void testGetPersonsPage(String pageSize, String pageNumber, int expectedPageSize,
+                            int expectedPageNumber, int numberOfGeneratedPersons, String description) {
+        personDataHandler.generatePersonsData(numberOfGeneratedPersons);
 
         PageResponse<PersonResponse> pageResponse =
                 getPersons(pageSize, pageNumber)
@@ -72,6 +73,7 @@ class GetPersonsIT {
         assertThat(pageResponse.getSize()).isEqualTo(expectedPageSize);
         assertThat(pageResponse.getNumber()).isEqualTo(expectedPageNumber);
         assertThat(pageResponse.getContent().size()).isEqualTo(expectedPageSize);
+        assertThat(pageResponse.getTotalElements()).isGreaterThanOrEqualTo(numberOfGeneratedPersons);
     }
 
     @Test
