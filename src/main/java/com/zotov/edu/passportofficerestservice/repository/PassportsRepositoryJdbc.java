@@ -29,7 +29,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
                 });
 
         jdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) values (?, ?, ?, ?, ?)",
-                passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getName(), passport.getOwnerId());
+                passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId());
 
         return passport;
     }
@@ -37,7 +37,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
     @Override
     public Passport save(Passport passport) {
         jdbcTemplate.update("update passports set given_date =?, department_code =?, state =?, owner_id =? where number =?",
-                passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getName(), passport.getOwnerId(), passport.getNumber());
+                passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId(), passport.getNumber());
 
         return passport;
     }
@@ -55,7 +55,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
         return jdbcTemplate.query("select * from passports where state =? and owner_id =? " +
                         "and (?::date is null or given_date >?) " +
                         "and (?::date is null or given_date <?)", new PassportRowMapper(),
-                state.getName(), personId, minGivenDate, minGivenDate, maxGivenDate, maxGivenDate);
+                state.getDatabaseName(), personId, minGivenDate, minGivenDate, maxGivenDate, maxGivenDate);
     }
 
     @Override

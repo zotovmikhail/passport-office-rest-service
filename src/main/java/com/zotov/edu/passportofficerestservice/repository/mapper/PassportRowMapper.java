@@ -14,7 +14,7 @@ public class PassportRowMapper implements RowMapper<Passport> {
                 resultSet.getString("number"),
                 resultSet.getDate("given_date").toLocalDate(),
                 resultSet.getString("department_code"),
-                PassportState.valueOf(resultSet.getString("state")),
+                PassportState.fromDatabaseName(resultSet.getString("state")),
                 resultSet.getString("owner_id")
         );
     }
