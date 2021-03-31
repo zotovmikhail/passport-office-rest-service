@@ -1,0 +1,15 @@
+application:
+  repository: jdbc
+spring:
+  datasource:
+    platform: postgres
+    driverClassName: org.testcontainers.jdbc.ContainerDatabaseDriver
+    url: jdbc:tc:postgresql:///passport_office
+    password: test
+    username: test
+  flyway:
+    locations: "classpath:db/migration"
+    enabled: true
+logging:
+  level:
+    ROOT: INFO
