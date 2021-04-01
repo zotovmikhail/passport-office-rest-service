@@ -7,6 +7,7 @@ import com.zotov.edu.passportofficerestservice.repository.mapper.PassportRowMapp
 import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -25,13 +26,12 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
 
     @Override
     public Passport create(Passport passport) {
-        findByPassportNumber(passport.getNumber())
-                .ifPresent(foundPassport -> {
-                    throw new PassportAlreadyExistsException(foundPassport.getNumber());
-                });
-
-        jdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) values (?, ?, ?, ?, ?)",
-                passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId());
+        try {
+            jdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) values (?, ?, ?, ?, ?)",
+                    passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId());
+        } catch (DuplicateKeyException exception) {
+            throw new PassportAlreadyExistsException(passport.getNumber());
+        }
 
         return passport;
     }

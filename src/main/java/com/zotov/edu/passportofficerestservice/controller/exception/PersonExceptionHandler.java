@@ -5,6 +5,7 @@ import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlre
 import com.zotov.edu.passportofficerestservice.service.exception.PassportIsAlreadyLostException;
 import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
 import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -62,5 +63,12 @@ public class PersonExceptionHandler {
     @ExceptionHandler(PassportAlreadyExistsException.class)
     public ErrorResponse handlePassportAlreadyExistsException(PassportAlreadyExistsException exception) {
         return new ErrorResponse(Collections.singletonList(exception.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(DataAccessException.class)
+    public ErrorResponse handlePassportAlreadyExistsException(DataAccessException exception) {
+        exception.printStackTrace();
+        return new ErrorResponse(Collections.singletonList("Database error"));
     }
 }

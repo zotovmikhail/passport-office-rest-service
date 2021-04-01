@@ -8,12 +8,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Repository
@@ -75,11 +77,20 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     @Override
     public void saveAll(List<Person> personsToAdd) {
-        List<Object[]> parametersToUpdate = personsToAdd
-                .stream()
-                .map(person -> new Object[]{person.getId(), person.getName(), person.getBirthday(), person.getCountry()})
-                .collect(Collectors.toList());
+        jdbcTemplate.batchUpdate("insert into persons values(?, ? ,? ,?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int indexOfElement) throws SQLException {
+                Person person = personsToAdd.get(indexOfElement);
+                preparedStatement.setString(1, person.getId());
+                preparedStatement.setString(2, person.getName());
+                preparedStatement.setObject(3, person.getBirthday());
+                preparedStatement.setString(4, person.getCountry());
+            }
 
-        jdbcTemplate.batchUpdate("insert into persons values(?, ? ,? ,?)", parametersToUpdate);
+            @Override
+            public int getBatchSize() {
+                return personsToAdd.size();
+            }
+        });
     }
 }
