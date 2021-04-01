@@ -7,8 +7,6 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 import static com.zotov.edu.passportofficerestservice.util.DataConverter.*;
 import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
@@ -20,9 +18,6 @@ class GetPersonIT {
 
     @Autowired
     private PersonDataHandler personDataHandler;
-
-    @Container
-    public static final PostgreSQLContainer<?> postgreSqlContainer = new PostgreSQLContainer<>("postgres");
 
     @Test
     void testGetPersonsByPersonIdAndVerify() {

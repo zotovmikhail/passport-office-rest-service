@@ -6,8 +6,6 @@ import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 import java.util.UUID;
 
@@ -20,9 +18,6 @@ class DeletePersonIT {
 
     @Autowired
     private PersonsRepository personsRepository;
-
-    @Container
-    public static final PostgreSQLContainer<?> postgreSqlContainer = new PostgreSQLContainer<>("postgres");
 
     @Test
     void testDeletePersonAndVerify() {

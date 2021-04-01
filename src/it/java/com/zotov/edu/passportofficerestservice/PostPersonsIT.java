@@ -12,8 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -27,9 +25,6 @@ class PostPersonsIT {
 
     @Autowired
     private PersonsRepository personsRepository;
-
-    @Container
-    public static final PostgreSQLContainer<?> postgreSqlContainer = new PostgreSQLContainer<>("postgres");
 
     @Test
     void testPostPersonAndVerify() {
