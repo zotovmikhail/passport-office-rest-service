@@ -6,4 +6,8 @@ public class PassportAlreadyExistsException extends RuntimeException {
     public PassportAlreadyExistsException(String passportId) {
         super(String.format("Passport with id '%s' already exists in the data", passportId));
     }
+
+    public PassportAlreadyExistsException(String passportId, Throwable cause) {
+        super(String.format("Passport with id '%s' already exists in the data", passportId), cause);
+    }
 }

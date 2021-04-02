@@ -30,7 +30,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
             jdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) values (?, ?, ?, ?, ?)",
                     passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId());
         } catch (DuplicateKeyException exception) {
-            throw new PassportAlreadyExistsException(passport.getNumber());
+            throw new PassportAlreadyExistsException(passport.getNumber(), exception);
         }
 
         return passport;
