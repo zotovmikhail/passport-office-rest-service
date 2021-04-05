@@ -10,6 +10,7 @@ spring:
   flyway:
     locations: "classpath:db/migration"
     enabled: true
+    check-location: false
 logging:
   level:
     ROOT: INFO
