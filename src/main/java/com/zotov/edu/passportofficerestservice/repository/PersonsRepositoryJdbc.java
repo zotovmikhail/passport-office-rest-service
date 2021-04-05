@@ -62,8 +62,10 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
     }
 
     @Override
-    public Boolean existsById(String id) {
-        return jdbcTemplate.queryForObject("select exists(select * from persons where id=?)", Boolean.class, id);
+    public boolean existsById(String id) {
+        return Optional
+                .ofNullable(jdbcTemplate.queryForObject("select exists(select * from persons where id=?)", Boolean.class, id))
+                .orElse(Boolean.FALSE);
     }
 
     @Override

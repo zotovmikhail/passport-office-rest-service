@@ -69,7 +69,7 @@ public class PassportsRepositoryCollections implements PassportsRepository {
     }
 
     @Override
-    public Boolean existsByPassportNumber(String passportNumber) {
+    public boolean existsByPassportNumber(String passportNumber) {
         return passports.containsKey(passportNumber);
     }
 

@@ -21,5 +21,5 @@ public interface PassportsRepository {
 
     void deleteAllByOwnerId(String ownerId);
 
-    Boolean existsByPassportNumber(String passportNumber);
+    boolean existsByPassportNumber(String passportNumber);
 }

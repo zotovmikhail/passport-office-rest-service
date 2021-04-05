@@ -60,7 +60,7 @@ public class PersonService {
     }
 
     public void checkIfPersonExists(String personId) {
-        if (personsRepository.existsById(personId).equals(Boolean.FALSE)) {
+        if (!personsRepository.existsById(personId)) {
             throw new PersonNotFoundException(personId);
         }
     }

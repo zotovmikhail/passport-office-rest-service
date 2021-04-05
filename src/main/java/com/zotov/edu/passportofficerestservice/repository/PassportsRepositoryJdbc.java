@@ -74,9 +74,10 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
     }
 
     @Override
-    public Boolean existsByPassportNumber(String passportNumber) {
-        return jdbcTemplate.queryForObject("select exists(select * from passports where number =?)",
-                Boolean.class, passportNumber);
+    public boolean existsByPassportNumber(String passportNumber) {
+        return Optional
+                .ofNullable(jdbcTemplate.queryForObject("select exists(select * from passports where number =?)", Boolean.class, passportNumber))
+                .orElse(Boolean.FALSE);
     }
 
 }

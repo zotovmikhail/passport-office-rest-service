@@ -49,7 +49,7 @@ public class PersonsRepositoryCollections implements PersonsRepository {
     }
 
     @Override
-    public Boolean existsById(String id) {
+    public boolean existsById(String id) {
         return persons.containsKey(id);
     }
 
