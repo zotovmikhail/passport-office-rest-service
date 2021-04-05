@@ -3,6 +3,7 @@ package com.zotov.edu.passportofficerestservice.repository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlreadyExistsException;
+import com.zotov.edu.passportofficerestservice.repository.mapper.ParameterSourceConverter;
 import com.zotov.edu.passportofficerestservice.repository.mapper.PassportRowMapper;
 import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -28,18 +28,14 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
 
     private final PassportRowMapper passportRowMapper;
 
+    private final ParameterSourceConverter parameterSourceConverter;
+
     @Override
     public Passport create(Passport passport) {
         try {
             namedParameterJdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) " +
                             "values(:number, :given_date, :department_code, :state, :owner_id)",
-                    Map.of(
-                            "number", passport.getNumber(),
-                            "given_date", passport.getGivenDate(),
-                            "department_code", passport.getDepartmentCode(),
-                            "state", passport.getState().getDatabaseName(),
-                            "owner_id", passport.getOwnerId())
-            );
+                    parameterSourceConverter.convertPassport(passport));
         } catch (DuplicateKeyException exception) {
             throw new PassportAlreadyExistsException(passport.getNumber(), exception);
         }
@@ -51,12 +47,7 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
     public Passport save(Passport passport) {
         namedParameterJdbcTemplate.update("update passports set given_date = :given_date, department_code = :department_code, " +
                         "state = :state, owner_id = :owner_id where number = :number",
-                Map.of(
-                        "given_date", passport.getGivenDate(),
-                        "department_code", passport.getDepartmentCode(),
-                        "state", passport.getState().getDatabaseName(),
-                        "owner_id", passport.getOwnerId(),
-                        "number", passport.getNumber())
+                parameterSourceConverter.convertPassport(passport)
         );
 
         return passport;

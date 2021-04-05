@@ -1,6 +1,7 @@
 package com.zotov.edu.passportofficerestservice.repository;
 
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
+import com.zotov.edu.passportofficerestservice.repository.mapper.ParameterSourceConverter;
 import com.zotov.edu.passportofficerestservice.repository.mapper.PersonRowMapper;
 import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
 import lombok.AllArgsConstructor;
@@ -9,9 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,6 +28,8 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     private final PersonRowMapper personRowMapper;
 
+    private final ParameterSourceConverter parameterSourceConverter;
+
     @Override
     public Page<Person> findAll(Pageable pageable) {
         List<Person> personsFromData = namedParameterJdbcTemplate.query("select * from persons limit :size offset :offset",
@@ -44,7 +45,7 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
     @Override
     public Person save(Person person) {
         namedParameterJdbcTemplate.update("update persons set name = :name, birthday = :birthday, country = :country where id = :id",
-                Map.of("id", person.getId(), "name", person.getName(), "birthday", person.getBirthday(), "country", person.getCountry()));
+                parameterSourceConverter.convertPerson(person));
 
         return person;
     }
@@ -52,12 +53,7 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
     @Override
     public Person create(Person person) {
         namedParameterJdbcTemplate.update("insert into persons(id, name, birthday, country) values(:id, :name, :birthday, :country)",
-                Map.of(
-                        "id", person.getId(),
-                        "name", person.getName(),
-                        "birthday", person.getBirthday(),
-                        "country", person.getCountry())
-        );
+                parameterSourceConverter.convertPerson(person));
 
         return person;
     }
@@ -87,16 +83,7 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     @Override
     public void saveAll(List<Person> personsToAdd) {
-        SqlParameterSource[] sqlParameters = personsToAdd
-                .stream()
-                .map(person -> new MapSqlParameterSource()
-                        .addValue("id", person.getId())
-                        .addValue("name", person.getName())
-                        .addValue("birthday", person.getBirthday())
-                        .addValue("country", person.getCountry()))
-                .toArray(SqlParameterSource[]::new);
-
-        namedParameterJdbcTemplate
-                .batchUpdate("insert into persons(id, name, birthday, country) values(:id, :name, :birthday, :country)", sqlParameters);
+        namedParameterJdbcTemplate.batchUpdate("insert into persons(id, name, birthday, country) values(:id, :name, :birthday, :country)",
+                        parameterSourceConverter.convertPersons(personsToAdd));
     }
 }
