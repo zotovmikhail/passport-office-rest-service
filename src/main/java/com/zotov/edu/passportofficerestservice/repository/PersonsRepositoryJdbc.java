@@ -8,13 +8,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -24,12 +25,14 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     private final PersonRowMapper personRowMapper;
 
     @Override
     public Page<Person> findAll(Pageable pageable) {
-        List<Person> personsFromData = jdbcTemplate.query("select * from persons limit ? offset ?", personRowMapper,
-                pageable.getPageSize(), pageable.getOffset());
+        List<Person> personsFromData = namedParameterJdbcTemplate.query("select * from persons limit :size offset :offset",
+                Map.of("size", pageable.getPageSize(), "offset", pageable.getPageNumber()), personRowMapper);
 
         long numberOfPersons = Optional.ofNullable(
                 jdbcTemplate.queryForObject("select count(*) from persons", Long.class))
@@ -40,16 +43,21 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     @Override
     public Person save(Person person) {
-        jdbcTemplate.update("update persons set name =?, birthday =?, country =? where id =?",
-                person.getName(), person.getBirthday(), person.getCountry(), person.getId());
+        namedParameterJdbcTemplate.update("update persons set name = :name, birthday = :birthday, country = :country where id = :id",
+                Map.of("id", person.getId(), "name", person.getName(), "birthday", person.getBirthday(), "country", person.getCountry()));
 
         return person;
     }
 
     @Override
     public Person create(Person person) {
-        jdbcTemplate.update("insert into persons(id, name, birthday, country) values(?, ?, ?, ?)",
-                person.getId(), person.getName(), person.getBirthday(), person.getCountry());
+        namedParameterJdbcTemplate.update("insert into persons(id, name, birthday, country) values(:id, :name, :birthday, :country)",
+                Map.of(
+                        "id", person.getId(),
+                        "name", person.getName(),
+                        "birthday", person.getBirthday(),
+                        "country", person.getCountry())
+        );
 
         return person;
     }
@@ -79,20 +87,16 @@ public class PersonsRepositoryJdbc implements PersonsRepository {
 
     @Override
     public void saveAll(List<Person> personsToAdd) {
-        jdbcTemplate.batchUpdate("insert into persons values(?, ? ,? ,?)", new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement preparedStatement, int indexOfElement) throws SQLException {
-                Person person = personsToAdd.get(indexOfElement);
-                preparedStatement.setString(1, person.getId());
-                preparedStatement.setString(2, person.getName());
-                preparedStatement.setObject(3, person.getBirthday());
-                preparedStatement.setString(4, person.getCountry());
-            }
+        SqlParameterSource[] sqlParameters = personsToAdd
+                .stream()
+                .map(person -> new MapSqlParameterSource()
+                        .addValue("id", person.getId())
+                        .addValue("name", person.getName())
+                        .addValue("birthday", person.getBirthday())
+                        .addValue("country", person.getCountry()))
+                .toArray(SqlParameterSource[]::new);
 
-            @Override
-            public int getBatchSize() {
-                return personsToAdd.size();
-            }
-        });
+        namedParameterJdbcTemplate
+                .batchUpdate("insert into persons(id, name, birthday, country) values(:id, :name, :birthday, :country)", sqlParameters);
     }
 }

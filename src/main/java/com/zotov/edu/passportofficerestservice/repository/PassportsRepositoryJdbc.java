@@ -9,10 +9,12 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -22,13 +24,22 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     private final PassportRowMapper passportRowMapper;
 
     @Override
     public Passport create(Passport passport) {
         try {
-            jdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) values (?, ?, ?, ?, ?)",
-                    passport.getNumber(), passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId());
+            namedParameterJdbcTemplate.update("insert into passports(number, given_date, department_code, state, owner_id) " +
+                            "values(:number, :given_date, :department_code, :state, :owner_id)",
+                    Map.of(
+                            "number", passport.getNumber(),
+                            "given_date", passport.getGivenDate(),
+                            "department_code", passport.getDepartmentCode(),
+                            "state", passport.getState().getDatabaseName(),
+                            "owner_id", passport.getOwnerId())
+            );
         } catch (DuplicateKeyException exception) {
             throw new PassportAlreadyExistsException(passport.getNumber(), exception);
         }
@@ -38,8 +49,15 @@ public class PassportsRepositoryJdbc implements PassportsRepository {
 
     @Override
     public Passport save(Passport passport) {
-        jdbcTemplate.update("update passports set given_date =?, department_code =?, state =?, owner_id =? where number =?",
-                passport.getGivenDate(), passport.getDepartmentCode(), passport.getState().getDatabaseName(), passport.getOwnerId(), passport.getNumber());
+        namedParameterJdbcTemplate.update("update passports set given_date = :given_date, department_code = :department_code, " +
+                        "state = :state, owner_id = :owner_id where number = :number",
+                Map.of(
+                        "given_date", passport.getGivenDate(),
+                        "department_code", passport.getDepartmentCode(),
+                        "state", passport.getState().getDatabaseName(),
+                        "owner_id", passport.getOwnerId(),
+                        "number", passport.getNumber())
+        );
 
         return passport;
     }
