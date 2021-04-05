@@ -67,7 +67,7 @@ public class PersonExceptionHandler {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(DataAccessException.class)
-    public ErrorResponse handlePassportAlreadyExistsException(DataAccessException exception) {
+    public ErrorResponse handleDatabaseException(DataAccessException exception) {
         return new ErrorResponse(Collections.singletonList("Database error"));
     }
 }
