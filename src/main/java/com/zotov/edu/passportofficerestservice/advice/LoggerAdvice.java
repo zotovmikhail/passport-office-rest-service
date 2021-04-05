@@ -43,6 +43,6 @@ public class LoggerAdvice {
 
     @AfterThrowing(pointcut = "execution(* com.zotov.edu.passportofficerestservice.controller..* (..)) ", throwing = "exception")
     public void logExceptions(Throwable exception) {
-        log.debug("Exception occurred:", exception);
+        log.error("Exception occurred:", exception);
     }
 }
