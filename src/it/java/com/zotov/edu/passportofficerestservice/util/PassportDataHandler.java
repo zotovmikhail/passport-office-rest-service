@@ -14,11 +14,11 @@ public class PassportDataHandler {
     private final PassportsRepository passportsRepository;
 
     public Passport generatePassportData(String ownerId) {
-        return passportsRepository.save(generatePassport(ownerId));
+        return passportsRepository.create(generatePassport(ownerId));
     }
 
     public Passport generatePassportData(Passport passport) {
-        return passportsRepository.save(passport);
+        return passportsRepository.create(passport);
     }
 
 }

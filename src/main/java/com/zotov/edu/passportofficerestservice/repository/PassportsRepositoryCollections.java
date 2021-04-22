@@ -4,6 +4,7 @@ import com.zotov.edu.passportofficerestservice.repository.entity.Passport;
 import com.zotov.edu.passportofficerestservice.repository.entity.PassportState;
 import com.zotov.edu.passportofficerestservice.repository.exception.PassportAlreadyExistsException;
 import com.zotov.edu.passportofficerestservice.service.exception.PassportNotFoundException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -14,9 +15,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
+@ConditionalOnProperty(value = "application.repository", havingValue = "memory")
 public class PassportsRepositoryCollections implements PassportsRepository {
 
-    Map<String, Passport> passports = new HashMap<>();
+    private final Map<String, Passport> passports = new HashMap<>();
 
     @Override
     public Passport create(Passport passport) {
@@ -71,10 +73,4 @@ public class PassportsRepositoryCollections implements PassportsRepository {
         return passports.containsKey(passportNumber);
     }
 
-    @Override
-    public void saveAll(List<Passport> passportsToAdd) {
-        Map<String, Passport> personsMap = passportsToAdd.stream()
-                .collect(Collectors.toMap(Passport::getNumber, person -> person));
-        passports.putAll(personsMap);
-    }
 }

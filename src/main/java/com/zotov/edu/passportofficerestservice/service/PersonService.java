@@ -1,7 +1,7 @@
 package com.zotov.edu.passportofficerestservice.service;
 
-import com.zotov.edu.passportofficerestservice.repository.PassportsRepositoryCollections;
-import com.zotov.edu.passportofficerestservice.repository.PersonsRepositoryCollections;
+import com.zotov.edu.passportofficerestservice.repository.PassportsRepository;
+import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
 import com.zotov.edu.passportofficerestservice.repository.converter.PersonEntityConverter;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
@@ -19,9 +19,9 @@ import java.util.List;
 @AllArgsConstructor
 public class PersonService {
 
-    private final PersonsRepositoryCollections personsRepository;
+    private final PersonsRepository personsRepository;
 
-    private final PassportsRepositoryCollections passportsRepository;
+    private final PassportsRepository passportsRepository;
 
     private final PersonEntityConverter personConverter;
 
@@ -31,7 +31,7 @@ public class PersonService {
 
     public Person createPerson(String name, LocalDate birthday, String country) {
         Person person = personConverter.convertToEntity(name, birthday, country);
-        return personsRepository.save(person);
+        return personsRepository.create(person);
     }
 
     public Person getPerson(String personId) {

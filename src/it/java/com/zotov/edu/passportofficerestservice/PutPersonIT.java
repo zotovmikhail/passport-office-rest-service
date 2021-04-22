@@ -1,23 +1,18 @@
 package com.zotov.edu.passportofficerestservice;
 
-import com.zotov.edu.passportofficerestservice.extension.TestConfigurationExtension;
-import com.zotov.edu.passportofficerestservice.extension.TestExecutionLoggerExtension;
+import com.zotov.edu.passportofficerestservice.extension.IntegrationTest;
 import com.zotov.edu.passportofficerestservice.model.ErrorMessage;
 import com.zotov.edu.passportofficerestservice.model.PersonPutRequest;
 import com.zotov.edu.passportofficerestservice.model.PersonResponse;
 import com.zotov.edu.passportofficerestservice.repository.PersonsRepository;
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.util.PersonDataHandler;
-import com.zotov.edu.passportofficerestservice.util.ReplaceCamelCase;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.stream.Stream;
 
@@ -25,9 +20,7 @@ import static com.zotov.edu.passportofficerestservice.util.PersonRequests.*;
 import static com.zotov.edu.passportofficerestservice.util.RandomDataGenerator.*;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DisplayNameGeneration(ReplaceCamelCase.class)
-@ExtendWith({TestExecutionLoggerExtension.class, TestConfigurationExtension.class})
+@IntegrationTest
 class PutPersonIT {
 
     @Autowired
