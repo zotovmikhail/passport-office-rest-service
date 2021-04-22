@@ -21,7 +21,5 @@ public interface PassportsRepository {
 
     void deleteAllByOwnerId(String ownerId);
 
-    void saveAll(List<Passport> convertToPassportEntities);
-
     boolean existsByPassportNumber(String passportNumber);
 }

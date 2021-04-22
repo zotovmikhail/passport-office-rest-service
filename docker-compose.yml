@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    image: 'passportoffice:latest'
+    build:
+      context: .
+    container_name: app
+    depends_on:
+      - db
+    environment:
+       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/passport_office
+    ports:
+      - "8080:8080"
+
+  db:
+    image: 'postgres:latest'
+    container_name: db
+    environment:
+      POSTGRES_DB: passport_office
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"

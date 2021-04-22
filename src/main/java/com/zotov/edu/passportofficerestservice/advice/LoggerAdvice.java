@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
 
 @Aspect
 @Component
@@ -35,11 +34,15 @@ public class LoggerAdvice {
     public Object logAdviceController(ProceedingJoinPoint joinPoint) throws Throwable {
         String className = joinPoint.getTarget().getClass().toString();
         String methodName = joinPoint.getSignature().getName();
-        log.error("Exception handler invoked: {}:{}", className, methodName);
-        log.error("Exception occurred: {}", Arrays.toString(joinPoint.getArgs()));
+        log.info("Exception handler invoked: {}:{}", className, methodName);
         Object response = joinPoint.proceed();
         log.info("{}:{}()\nResponse:\n {}", className, methodName,
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
         return response;
+    }
+
+    @AfterThrowing(pointcut = "execution(* com.zotov.edu.passportofficerestservice.controller..* (..)) ", throwing = "exception")
+    public void logExceptions(Throwable exception) {
+        log.error("Exception occurred:", exception);
     }
 }

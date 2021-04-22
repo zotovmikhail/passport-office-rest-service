@@ -2,6 +2,7 @@ package com.zotov.edu.passportofficerestservice.repository;
 
 import com.zotov.edu.passportofficerestservice.repository.entity.Person;
 import com.zotov.edu.passportofficerestservice.service.exception.PersonNotFoundException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,9 +15,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
+@ConditionalOnProperty(value = "application.repository", havingValue = "memory")
 public class PersonsRepositoryCollections implements PersonsRepository {
 
-    Map<String, Person> persons = new LinkedHashMap<>();
+    private final Map<String, Person> persons = new LinkedHashMap<>();
 
     @Override
     public Page<Person> findAll(Pageable pageable) {
@@ -28,6 +30,11 @@ public class PersonsRepositoryCollections implements PersonsRepository {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(personsFromData, pageable, persons.size());
+    }
+
+    @Override
+    public Person create(Person person) {
+        return save(person);
     }
 
     @Override

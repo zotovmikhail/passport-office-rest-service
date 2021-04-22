@@ -19,6 +19,16 @@
         <sonar.projectKey>zotovmikhail_passport-office-rest-service</sonar.projectKey>
         <sonar.organization>zotovmikhail</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <testcontainers.version>1.15.2</testcontainers.version>
+        <javax.validation.version>2.0.1.Final</javax.validation.version>
+        <io.rest-assured.version>4.2.0</io.rest-assured.version>
+        <org.hamcres.version>1.3</org.hamcres.version>
+        <com.neovisionaries.version>1.27</com.neovisionaries.version>
+        <com.github.javafaker>1.0.2</com.github.javafaker>
+        <org.postgresql.version>42.2.19</org.postgresql.version>
+        <org.flywaydb.version>7.7.0</org.flywaydb.version>
+        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+        <maven-resource-plugin.version>maven-resources-plugin</maven-resource-plugin.version>
     </properties>
 
     <dependencies>
@@ -35,14 +45,22 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>2.4.3</version>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
-            <version>2.0.1.Final</version>
+            <version>${javax.validation.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -57,30 +75,52 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured-all</artifactId>
-            <version>4.2.0</version>
+            <version>${io.rest-assured.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>4.2.0</version>
+            <version>${io.rest-assured.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
+            <version>${org.hamcres.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.neovisionaries</groupId>
             <artifactId>nv-i18n</artifactId>
-            <version>1.27</version>
+            <version>${com.neovisionaries.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.javafaker</groupId>
             <artifactId>javafaker</artifactId>
-            <version>1.0.2</version>
+            <version>${com.github.javafaker}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${org.postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${org.flywaydb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -91,6 +131,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                    <image>
+                        <name>passportoffice</name>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -102,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M5</version>
+                <version>${maven-failsafe-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -115,7 +161,28 @@
                     <parallel>classesAndMethods</parallel>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <configuration>
+                    <delimiters>
+                        <delimiter>@</delimiter>
+                    </delimiters>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                </configuration>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/it/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 
 </project>
